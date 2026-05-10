@@ -64,6 +64,7 @@ export function App() {
     const editingPlant = editing === 'new' ? null : editing;
     return (
       <PlantForm
+        uid={authState.uid}
         plant={editingPlant}
         onSave={upsertPlant}
         onDelete={editingPlant ? () => deletePlant(editingPlant.id) : null}
@@ -89,9 +90,12 @@ export function App() {
         </button>
       </header>
       <main className="main">
-        {tab === 'today' && <TodayView plants={state.plants} onMarkDone={markDone} />}
+        {tab === 'today' && (
+          <TodayView uid={authState.uid} plants={state.plants} onMarkDone={markDone} />
+        )}
         {tab === 'plants' && (
           <PlantList
+            uid={authState.uid}
             plants={state.plants}
             onSelect={(p) => setEditing(p)}
             onAdd={() => setEditing('new')}

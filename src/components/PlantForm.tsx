@@ -9,15 +9,18 @@ import {
   type ScheduleRule,
   type TaskType,
 } from '../types';
+import { PhotoPicker } from './PhotoPicker';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 export function PlantForm({
+  uid,
   plant,
   onSave,
   onDelete,
   onCancel,
 }: {
+  uid: string;
   plant: Plant | null;
   onSave: (plant: Plant) => void;
   onDelete: (() => void) | null;
@@ -26,6 +29,7 @@ export function PlantForm({
   const [name, setName] = useState(plant?.name ?? '');
   const [room, setRoom] = useState(plant?.room ?? '');
   const [notes, setNotes] = useState(plant?.notes ?? '');
+  const [photoFileId, setPhotoFileId] = useState(plant?.photoFileId);
   const [schedules, setSchedules] = useState<Partial<Record<TaskType, ScheduleRule[]>>>(
     plant?.schedules ?? {},
   );
@@ -48,7 +52,7 @@ export function PlantForm({
       name: name.trim(),
       room: room.trim() || undefined,
       notes: notes.trim() || undefined,
-      photoFileId: plant?.photoFileId,
+      photoFileId,
       schedules,
       lastDone: plant?.lastDone ?? {},
     };
@@ -68,6 +72,8 @@ export function PlantForm({
       </header>
 
       <main className="form-body">
+        <PhotoPicker uid={uid} photoId={photoFileId} onChange={setPhotoFileId} />
+
         <label className="field">
           <span className="field-label">Name</span>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Monstera" />

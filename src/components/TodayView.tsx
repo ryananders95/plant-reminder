@@ -5,12 +5,15 @@ import {
   type DueItem,
   type PlantDueGroup,
 } from '../lib/schedule';
+import { usePhotoUrl } from '../lib/photos';
 import { TASK_EMOJIS, TASK_LABELS, type Plant, type TaskType } from '../types';
 
 export function TodayView({
+  uid,
   plants,
   onMarkDone,
 }: {
+  uid: string;
   plants: Plant[];
   onMarkDone: (plantId: string, taskType: TaskType) => void;
 }) {
@@ -38,7 +41,12 @@ export function TodayView({
               </div>
             ) : (
               todayGroups.map((group) => (
-                <PlantTodayCard key={group.plant.id} group={group} onMarkDone={onMarkDone} />
+                <PlantTodayCard
+                  key={group.plant.id}
+                  uid={uid}
+                  group={group}
+                  onMarkDone={onMarkDone}
+                />
               ))
             )}
           </section>
@@ -49,6 +57,7 @@ export function TodayView({
               {upcoming.map((item) => (
                 <ComingUpRow
                   key={`${item.plant.id}-${item.taskType}`}
+                  uid={uid}
                   item={item}
                   onMarkDone={onMarkDone}
                 />
@@ -62,15 +71,19 @@ export function TodayView({
 }
 
 function PlantTodayCard({
+  uid,
   group,
   onMarkDone,
 }: {
+  uid: string;
   group: PlantDueGroup;
   onMarkDone: (plantId: string, taskType: TaskType) => void;
 }) {
   const { plant, tasks } = group;
+  const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
     <div className="plant-card">
+      <PlantThumb photoUrl={photoUrl} />
       <div className="plant-card-info">
         <div className="plant-name">{plant.name}</div>
         {plant.room && <div className="plant-card-room">{plant.room}</div>}
@@ -97,16 +110,20 @@ function PlantTodayCard({
 }
 
 function ComingUpRow({
+  uid,
   item,
   onMarkDone,
 }: {
+  uid: string;
   item: DueItem;
   onMarkDone: (plantId: string, taskType: TaskType) => void;
 }) {
   const { plant, taskType, daysUntilDue } = item;
   const detail = `In ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`;
+  const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
     <div className="duerow">
+      <PlantThumb photoUrl={photoUrl} />
       <div className="duerow-info">
         <div className="plant-name">{plant.name}</div>
         <div className="task-meta">
@@ -122,5 +139,13 @@ function ComingUpRow({
         Complete early
       </button>
     </div>
+  );
+}
+
+function PlantThumb({ photoUrl }: { photoUrl: string | undefined }) {
+  return (
+    <span className="plant-thumb">
+      {photoUrl ? <img src={photoUrl} alt="" /> : <span aria-hidden="true">🪴</span>}
+    </span>
   );
 }
