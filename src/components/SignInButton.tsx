@@ -31,12 +31,6 @@ export function SignInButton() {
 }
 
 export function SignInScreen() {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  const showIOSHint = isIOS && !isStandalone;
-
   return (
     <div className="signin">
       <div className="signin-card">
@@ -44,12 +38,6 @@ export function SignInScreen() {
         <h1>Plant Reminder</h1>
         <p>Reminders to water, fertilize, and mist your houseplants.</p>
         <SignInButton />
-        {showIOSHint && (
-          <p className="ios-hint">
-            For push notifications on iPhone, first tap <strong>Share</strong> →{' '}
-            <strong>Add to Home Screen</strong>, then open from the home screen and sign in.
-          </p>
-        )}
       </div>
     </div>
   );

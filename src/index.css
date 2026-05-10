@@ -45,6 +45,56 @@ textarea {
   color: inherit;
 }
 
+/* Install banner */
+.install-banner {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #fff8d6;
+  border-bottom: 1px solid #e9dc8e;
+  color: #5a4a00;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+.install-banner-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+.install-banner-text {
+  flex: 1;
+}
+.install-banner-text strong {
+  color: #3a3000;
+}
+.install-banner-install {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.install-banner-dismiss {
+  background: transparent;
+  border: none;
+  color: #5a4a00;
+  font-size: 1rem;
+  padding: 4px 6px;
+  line-height: 1;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.install-banner-dismiss:active {
+  opacity: 1;
+}
+
 /* App shell */
 .app {
   display: flex;

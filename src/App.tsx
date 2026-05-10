@@ -7,6 +7,7 @@ import { TodayView } from './components/TodayView';
 import { PlantList } from './components/PlantList';
 import { PlantForm } from './components/PlantForm';
 import { SignInScreen } from './components/SignInButton';
+import { InstallBanner } from './components/InstallBanner';
 
 type Tab = 'today' | 'plants';
 type Editing = Plant | 'new' | null;
@@ -25,11 +26,21 @@ export function App() {
   }, [uid]);
 
   if (authState === 'loading') {
-    return <div className="loading">Loading…</div>;
+    return (
+      <>
+        <InstallBanner />
+        <div className="loading">Loading…</div>
+      </>
+    );
   }
 
   if (!authState) {
-    return <SignInScreen />;
+    return (
+      <>
+        <InstallBanner />
+        <SignInScreen />
+      </>
+    );
   }
 
   const update = (newState: AppState) => {
@@ -63,13 +74,16 @@ export function App() {
   if (editing) {
     const editingPlant = editing === 'new' ? null : editing;
     return (
-      <PlantForm
-        uid={authState.uid}
-        plant={editingPlant}
-        onSave={upsertPlant}
-        onDelete={editingPlant ? () => deletePlant(editingPlant.id) : null}
-        onCancel={() => setEditing(null)}
-      />
+      <>
+        <InstallBanner />
+        <PlantForm
+          uid={authState.uid}
+          plant={editingPlant}
+          onSave={upsertPlant}
+          onDelete={editingPlant ? () => deletePlant(editingPlant.id) : null}
+          onCancel={() => setEditing(null)}
+        />
+      </>
     );
   }
 
@@ -77,6 +91,7 @@ export function App() {
 
   return (
     <div className="app">
+      <InstallBanner />
       <header className="header">
         <h1>Plant Reminder</h1>
         <button
