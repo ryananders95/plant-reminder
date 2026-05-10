@@ -10,17 +10,17 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
       </header>
 
       <main className="form-body help-body">
-        <h3 className="help-heading">The two tabs</h3>
+        <h3 className="help-heading">How to use Plant Reminder</h3>
         <p>
-          <strong>Today</strong> shows what needs attention. Plants with tasks that are due today
-          or overdue appear as cards with task buttons. Tap a button (
+          The <strong>Today</strong> tab shows what needs attention. Plants with tasks that are
+          due today or overdue appear as cards with task buttons. Tap a button (
           <span aria-hidden="true">💧</span> Water, <span aria-hidden="true">💦</span> Mist,{' '}
           <span aria-hidden="true">🍩</span> Fertilize) to mark it done. Overdue tasks have a red
           button with a day count. The <em>Coming Up</em> section lists tasks due in the next
           week — tap <em>Complete early</em> to do them ahead of schedule.
         </p>
         <p>
-          <strong>Plants</strong> is your full plant list, grouped by room. Tap{' '}
+          The <strong>Plants</strong> tab is your full plant list, grouped by room. Tap{' '}
           <em>+ Add Plant</em> to add one. Tap any plant to edit its name, room, notes, photo,
           and schedules.
         </p>
