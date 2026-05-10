@@ -118,12 +118,17 @@ textarea {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
+  flex-shrink: 0;
 }
 .help-btn {
   background: rgba(255, 255, 255, 0.18);
@@ -150,7 +155,7 @@ textarea {
   padding: 6px 12px;
   font-size: 0.85rem;
   font-weight: 500;
-  max-width: 50%;
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
