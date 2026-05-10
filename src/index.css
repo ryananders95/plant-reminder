@@ -157,6 +157,18 @@ textarea {
 .ios-hint strong {
   color: var(--text);
 }
+.signin-error {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(176, 0, 32, 0.08);
+  border: 1px solid rgba(176, 0, 32, 0.3);
+  border-radius: 8px;
+  color: var(--danger);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: left;
+  word-break: break-word;
+}
 
 .main {
   flex: 1;

@@ -4,7 +4,6 @@ import {
   getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut as fbSignOut,
   type User,
 } from 'firebase/auth';
@@ -12,12 +11,8 @@ import { auth } from './firebase';
 
 const provider = new GoogleAuthProvider();
 
-function isMobile(): boolean {
-  return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-}
-
 export function signIn(): Promise<unknown> {
-  return isMobile() ? signInWithRedirect(auth, provider) : signInWithPopup(auth, provider);
+  return signInWithPopup(auth, provider);
 }
 
 export function signOut(): Promise<void> {
@@ -30,7 +25,8 @@ export function useAuth(): AuthState {
   const [state, setState] = useState<AuthState>('loading');
 
   useEffect(() => {
-    getRedirectResult(auth).catch((err) => console.error('Sign-in redirect error:', err));
+    // Drain any pending redirect from older sign-in attempts, then ignore.
+    getRedirectResult(auth).catch(() => {});
     const unsub = onAuthStateChanged(auth, (user) => setState(user));
     return unsub;
   }, []);

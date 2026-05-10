@@ -1,11 +1,32 @@
+import { useState } from 'react';
+import { FirebaseError } from 'firebase/app';
 import { signIn } from '../lib/auth';
 
 export function SignInButton() {
+  const [error, setError] = useState<string | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
+
+  const handleClick = async () => {
+    setError(null);
+    setSigningIn(true);
+    try {
+      await signIn();
+    } catch (err) {
+      setError(describeAuthError(err));
+      console.error('Sign-in error:', err);
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
   return (
-    <button className="google-signin" onClick={() => void signIn()}>
-      <GoogleIcon />
-      Sign in with Google
-    </button>
+    <>
+      <button className="google-signin" onClick={handleClick} disabled={signingIn}>
+        <GoogleIcon />
+        {signingIn ? 'Signing in…' : 'Sign in with Google'}
+      </button>
+      {error && <p className="signin-error">{error}</p>}
+    </>
   );
 }
 
@@ -32,6 +53,26 @@ export function SignInScreen() {
       </div>
     </div>
   );
+}
+
+function describeAuthError(err: unknown): string {
+  if (err instanceof FirebaseError) {
+    switch (err.code) {
+      case 'auth/popup-blocked':
+        return 'Your browser blocked the sign-in popup. Allow popups for this site and try again.';
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return 'Sign-in was cancelled. Tap the button to try again.';
+      case 'auth/unauthorized-domain':
+        return `This domain isn't on the Firebase authorized list. Add it under Authentication → Settings → Authorized domains.`;
+      case 'auth/network-request-failed':
+        return 'Network error. Check your connection and try again.';
+      default:
+        return `${err.code}: ${err.message}`;
+    }
+  }
+  if (err instanceof Error) return err.message;
+  return 'Sign-in failed for an unknown reason.';
 }
 
 function GoogleIcon() {
