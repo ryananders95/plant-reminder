@@ -8,6 +8,7 @@ import { PlantList } from './components/PlantList';
 import { PlantForm } from './components/PlantForm';
 import { SignInScreen } from './components/SignInButton';
 import { InstallBanner } from './components/InstallBanner';
+import { HelpScreen } from './components/HelpScreen';
 
 type Tab = 'today' | 'plants';
 type Editing = Plant | 'new' | null;
@@ -17,6 +18,7 @@ export function App() {
   const [state, setState] = useState<AppState>(() => loadInitialState());
   const [tab, setTab] = useState<Tab>('today');
   const [editing, setEditing] = useState<Editing>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const uid = authState && authState !== 'loading' ? authState.uid : null;
 
@@ -71,6 +73,15 @@ export function App() {
     });
   };
 
+  if (showHelp) {
+    return (
+      <>
+        <InstallBanner />
+        <HelpScreen onClose={() => setShowHelp(false)} />
+      </>
+    );
+  }
+
   if (editing) {
     const editingPlant = editing === 'new' ? null : editing;
     return (
@@ -94,15 +105,24 @@ export function App() {
       <InstallBanner />
       <header className="header">
         <h1>Plant Reminder</h1>
-        <button
-          className="signout-chip"
-          onClick={() => {
-            if (window.confirm(`Sign out of Plant Reminder?`)) void signOut();
-          }}
-          aria-label="Sign out"
-        >
-          {displayName}
-        </button>
+        <div className="header-actions">
+          <button
+            className="signout-chip"
+            onClick={() => {
+              if (window.confirm(`Sign out of Plant Reminder?`)) void signOut();
+            }}
+            aria-label="Sign out"
+          >
+            {displayName}
+          </button>
+          <button
+            className="help-btn"
+            onClick={() => setShowHelp(true)}
+            aria-label="Help"
+          >
+            ?
+          </button>
+        </div>
       </header>
       <main className="main">
         {tab === 'today' && (
