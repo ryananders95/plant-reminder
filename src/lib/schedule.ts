@@ -1,5 +1,5 @@
 import { addDays, addMonths, differenceInCalendarDays, format, parseISO, startOfDay, startOfMonth } from 'date-fns';
-import type { Plant, ScheduleRule, TaskType } from '../types';
+import { TASK_TYPES, type Plant, type ScheduleRule, type TaskType } from '../types';
 
 export const ISO_DATE = 'yyyy-MM-dd';
 
@@ -68,6 +68,35 @@ export function collectDueItems(plants: Plant[], today: Date, withinDays = 3): D
   }
   items.sort((a, b) => a.daysUntilDue - b.daysUntilDue || a.plant.name.localeCompare(b.plant.name));
   return items;
+}
+
+export interface PlantDueGroup {
+  plant: Plant;
+  tasks: DueItem[];
+  mostUrgentDays: number;
+}
+
+export function groupTodayByPlant(items: DueItem[]): PlantDueGroup[] {
+  const byPlant = new Map<string, DueItem[]>();
+  for (const item of items) {
+    if (item.daysUntilDue > 0) continue;
+    const existing = byPlant.get(item.plant.id) ?? [];
+    existing.push(item);
+    byPlant.set(item.plant.id, existing);
+  }
+  const groups: PlantDueGroup[] = [];
+  for (const tasks of byPlant.values()) {
+    tasks.sort(
+      (a, b) =>
+        a.daysUntilDue - b.daysUntilDue ||
+        TASK_TYPES.indexOf(a.taskType) - TASK_TYPES.indexOf(b.taskType),
+    );
+    groups.push({ plant: tasks[0].plant, tasks, mostUrgentDays: tasks[0].daysUntilDue });
+  }
+  groups.sort(
+    (a, b) => a.mostUrgentDays - b.mostUrgentDays || a.plant.name.localeCompare(b.plant.name),
+  );
+  return groups;
 }
 
 export function summarizeRules(rules: ScheduleRule[]): string {

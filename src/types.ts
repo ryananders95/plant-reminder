@@ -7,6 +7,12 @@ export const TASK_LABELS: Record<TaskType, string> = {
   mist: 'Mist',
 };
 
+export const TASK_EMOJIS: Record<TaskType, string> = {
+  water: '💧',
+  fertilize: '🍩',
+  mist: '💦',
+};
+
 export const ALL_MONTHS: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export interface ScheduleRule {

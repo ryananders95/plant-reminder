@@ -1,4 +1,4 @@
-import { TASK_LABELS, type Plant, type TaskType } from '../types';
+import { TASK_EMOJIS, TASK_LABELS, type Plant, type TaskType } from '../types';
 
 export function PlantList({
   plants,
@@ -45,7 +45,7 @@ export function PlantList({
                     {Object.keys(plant.schedules).length === 0
                       ? 'No schedules'
                       : (Object.keys(plant.schedules) as TaskType[])
-                          .map((t) => TASK_LABELS[t])
+                          .map((t) => `${TASK_EMOJIS[t]} ${TASK_LABELS[t]}`)
                           .join(' · ')}
                   </div>
                 </button>

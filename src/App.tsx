@@ -1,46 +1,63 @@
 import { useEffect, useState } from 'react';
-import { loadState, saveState } from './lib/storage';
+import { loadInitialState, saveState, subscribeToState } from './lib/storage';
 import { todayIso } from './lib/schedule';
+import { signOut, useAuth } from './lib/auth';
 import type { AppState, Plant, TaskType } from './types';
 import { TodayView } from './components/TodayView';
 import { PlantList } from './components/PlantList';
 import { PlantForm } from './components/PlantForm';
+import { SignInScreen } from './components/SignInButton';
 
 type Tab = 'today' | 'plants';
 type Editing = Plant | 'new' | null;
 
 export function App() {
-  const [state, setState] = useState<AppState>(() => loadState());
+  const authState = useAuth();
+  const [state, setState] = useState<AppState>(() => loadInitialState());
   const [tab, setTab] = useState<Tab>('today');
   const [editing, setEditing] = useState<Editing>(null);
 
+  const uid = authState && authState !== 'loading' ? authState.uid : null;
+
   useEffect(() => {
-    saveState(state);
-  }, [state]);
+    if (!uid) return;
+    return subscribeToState(uid, setState);
+  }, [uid]);
+
+  if (authState === 'loading') {
+    return <div className="loading">Loading…</div>;
+  }
+
+  if (!authState) {
+    return <SignInScreen />;
+  }
+
+  const update = (newState: AppState) => {
+    setState(newState);
+    void saveState(authState.uid, newState);
+  };
 
   const upsertPlant = (plant: Plant) => {
-    setState((prev) => {
-      const idx = prev.plants.findIndex((p) => p.id === plant.id);
-      const plants =
-        idx >= 0 ? prev.plants.map((p, i) => (i === idx ? plant : p)) : [...prev.plants, plant];
-      return { ...prev, plants };
-    });
+    const idx = state.plants.findIndex((p) => p.id === plant.id);
+    const plants =
+      idx >= 0 ? state.plants.map((p, i) => (i === idx ? plant : p)) : [...state.plants, plant];
+    update({ ...state, plants });
     setEditing(null);
   };
 
   const deletePlant = (id: string) => {
-    setState((prev) => ({ ...prev, plants: prev.plants.filter((p) => p.id !== id) }));
+    update({ ...state, plants: state.plants.filter((p) => p.id !== id) });
     setEditing(null);
   };
 
   const markDone = (plantId: string, taskType: TaskType) => {
     const today = todayIso();
-    setState((prev) => ({
-      ...prev,
-      plants: prev.plants.map((p) =>
+    update({
+      ...state,
+      plants: state.plants.map((p) =>
         p.id === plantId ? { ...p, lastDone: { ...p.lastDone, [taskType]: today } } : p,
       ),
-    }));
+    });
   };
 
   if (editing) {
@@ -55,10 +72,21 @@ export function App() {
     );
   }
 
+  const displayName = authState.displayName?.split(' ')[0] ?? 'Signed in';
+
   return (
     <div className="app">
       <header className="header">
         <h1>Plant Reminder</h1>
+        <button
+          className="signout-chip"
+          onClick={() => {
+            if (window.confirm(`Sign out of Plant Reminder?`)) void signOut();
+          }}
+          aria-label="Sign out"
+        >
+          {displayName}
+        </button>
       </header>
       <main className="main">
         {tab === 'today' && <TodayView plants={state.plants} onMarkDone={markDone} />}

@@ -1,6 +1,11 @@
 import { format } from 'date-fns';
-import { collectDueItems, type DueItem } from '../lib/schedule';
-import { TASK_LABELS, type Plant, type TaskType } from '../types';
+import {
+  collectDueItems,
+  groupTodayByPlant,
+  type DueItem,
+  type PlantDueGroup,
+} from '../lib/schedule';
+import { TASK_EMOJIS, TASK_LABELS, type Plant, type TaskType } from '../types';
 
 export function TodayView({
   plants,
@@ -11,64 +16,87 @@ export function TodayView({
 }) {
   const today = new Date();
   const items = collectDueItems(plants, today, 7);
-
-  const overdue = items.filter((i) => i.daysUntilDue < 0);
-  const dueToday = items.filter((i) => i.daysUntilDue === 0);
+  const todayGroups = groupTodayByPlant(items);
   const upcoming = items.filter((i) => i.daysUntilDue > 0);
 
   return (
     <div className="today">
       <h2 className="date">{format(today, 'EEEE, MMMM d')}</h2>
 
-      {plants.length === 0 && (
+      {plants.length === 0 ? (
         <div className="empty">
           <p>No plants yet.</p>
           <p className="hint">Switch to the Plants tab to add your first one.</p>
         </div>
-      )}
+      ) : (
+        <>
+          <section>
+            <h3 className="section-title">Today</h3>
+            {todayGroups.length === 0 ? (
+              <div className="empty">
+                <p>All caught up!</p>
+              </div>
+            ) : (
+              todayGroups.map((group) => (
+                <PlantTodayCard key={group.plant.id} group={group} onMarkDone={onMarkDone} />
+              ))
+            )}
+          </section>
 
-      {overdue.length > 0 && (
-        <section>
-          <h3 className="section-title overdue">Overdue</h3>
-          {overdue.map((item) => (
-            <DueRow key={key(item)} item={item} onMarkDone={onMarkDone} />
-          ))}
-        </section>
-      )}
-
-      {dueToday.length > 0 && (
-        <section>
-          <h3 className="section-title">Due Today</h3>
-          {dueToday.map((item) => (
-            <DueRow key={key(item)} item={item} onMarkDone={onMarkDone} />
-          ))}
-        </section>
-      )}
-
-      {upcoming.length > 0 && (
-        <section>
-          <h3 className="section-title">Coming Up</h3>
-          {upcoming.map((item) => (
-            <DueRow key={key(item)} item={item} onMarkDone={onMarkDone} />
-          ))}
-        </section>
-      )}
-
-      {plants.length > 0 && items.length === 0 && (
-        <div className="empty">
-          <p>All caught up.</p>
-          <p className="hint">Nothing due in the next week.</p>
-        </div>
+          {upcoming.length > 0 && (
+            <section>
+              <h3 className="section-title">Coming Up</h3>
+              {upcoming.map((item) => (
+                <ComingUpRow
+                  key={`${item.plant.id}-${item.taskType}`}
+                  item={item}
+                  onMarkDone={onMarkDone}
+                />
+              ))}
+            </section>
+          )}
+        </>
       )}
     </div>
   );
 }
 
-function key(item: DueItem) {
-  return `${item.plant.id}-${item.taskType}`;
+function PlantTodayCard({
+  group,
+  onMarkDone,
+}: {
+  group: PlantDueGroup;
+  onMarkDone: (plantId: string, taskType: TaskType) => void;
+}) {
+  const { plant, tasks } = group;
+  return (
+    <div className="plant-card">
+      <div className="plant-card-info">
+        <div className="plant-name">{plant.name}</div>
+        {plant.room && <div className="plant-card-room">{plant.room}</div>}
+      </div>
+      <div className="plant-card-actions">
+        {tasks.map((task) => (
+          <button
+            key={task.taskType}
+            className={`task-button ${task.daysUntilDue < 0 ? 'overdue' : 'today'}`}
+            onClick={() => onMarkDone(plant.id, task.taskType)}
+          >
+            <span className="task-button-emoji" aria-hidden="true">
+              {TASK_EMOJIS[task.taskType]}
+            </span>
+            {TASK_LABELS[task.taskType]}
+            {task.daysUntilDue < 0 && (
+              <span className="task-button-meta"> · {-task.daysUntilDue}d</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function DueRow({
+function ComingUpRow({
   item,
   onMarkDone,
 }: {
@@ -76,24 +104,22 @@ function DueRow({
   onMarkDone: (plantId: string, taskType: TaskType) => void;
 }) {
   const { plant, taskType, daysUntilDue } = item;
-  const detail =
-    daysUntilDue < 0
-      ? `${-daysUntilDue} day${-daysUntilDue === 1 ? '' : 's'} overdue`
-      : daysUntilDue === 0
-        ? 'Today'
-        : `In ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`;
-
+  const detail = `In ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`;
   return (
-    <div className={`duerow ${daysUntilDue < 0 ? 'is-overdue' : ''}`}>
+    <div className="duerow">
       <div className="duerow-info">
         <div className="plant-name">{plant.name}</div>
         <div className="task-meta">
-          {TASK_LABELS[taskType]} · {detail}
+          <span aria-hidden="true">{TASK_EMOJIS[taskType]}</span> {TASK_LABELS[taskType]} ·{' '}
+          {detail}
           {plant.room ? ` · ${plant.room}` : ''}
         </div>
       </div>
-      <button className="mark-done" onClick={() => onMarkDone(plant.id, taskType)}>
-        Done
+      <button
+        className="complete-early"
+        onClick={() => onMarkDone(plant.id, taskType)}
+      >
+        Complete early
       </button>
     </div>
   );

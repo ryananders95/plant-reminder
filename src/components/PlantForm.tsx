@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ALL_MONTHS,
+  TASK_EMOJIS,
   TASK_LABELS,
   TASK_TYPES,
   type Plant,
@@ -173,7 +174,9 @@ function ScheduleEditor({
               )
             }
           />
-          <span>{TASK_LABELS[taskType]}</span>
+          <span>
+            <span aria-hidden="true">{TASK_EMOJIS[taskType]}</span> {TASK_LABELS[taskType]}
+          </span>
         </label>
       </legend>
 
