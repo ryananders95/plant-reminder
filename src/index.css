@@ -1,0 +1,363 @@
+:root {
+  --bg: #f6f8f6;
+  --surface: #ffffff;
+  --border: #d8e0d8;
+  --text: #1b2620;
+  --muted: #5e6e64;
+  --primary: #2d6a4f;
+  --primary-light: #95d5b2;
+  --primary-dark: #1b4332;
+  --danger: #b00020;
+  --warning: #d97706;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  overscroll-behavior-y: contain;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+  color: inherit;
+}
+
+/* App shell */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.header {
+  background: var(--primary);
+  color: #fff;
+  padding: env(safe-area-inset-top) 16px 12px;
+  padding-top: calc(env(safe-area-inset-top) + 12px);
+}
+.header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.main {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 16px 0;
+  color: var(--muted);
+  font-weight: 500;
+}
+.tab.active {
+  color: var(--primary);
+}
+
+/* Today view */
+.today .date {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.section-title {
+  margin: 20px 0 8px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.section-title.overdue {
+  color: var(--danger);
+}
+
+.duerow {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+.duerow.is-overdue {
+  border-color: var(--danger);
+}
+.duerow-info {
+  flex: 1;
+  min-width: 0;
+}
+.plant-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.task-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.mark-done {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+}
+.mark-done:active {
+  background: var(--primary-dark);
+}
+
+/* Plants tab */
+.add-button {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.plant-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+.plant-tasks {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Empty state */
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 32px 16px;
+}
+.empty p {
+  margin: 4px 0;
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: normal;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--primary);
+  color: #fff;
+  padding: env(safe-area-inset-top) 8px 8px;
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+  gap: 8px;
+}
+.form-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.header-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 8px 12px;
+  font-weight: 500;
+}
+.header-btn.primary {
+  font-weight: 700;
+}
+.header-btn:disabled {
+  opacity: 0.5;
+}
+
+.form-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+
+.field {
+  display: block;
+  margin-bottom: 12px;
+}
+.field-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.field.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field.inline .field-label {
+  margin: 0;
+}
+.field.inline input {
+  width: 80px;
+}
+
+/* Schedule editor */
+.schedule-editor {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: var(--surface);
+}
+.schedule-editor legend {
+  padding: 0 6px;
+}
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.toggle input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+}
+.schedule-body {
+  margin-top: 8px;
+}
+.rule-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: var(--bg);
+}
+.rule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.rule-delete {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.rule-delete:active {
+  background: var(--border);
+}
+.add-rule {
+  width: 100%;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 10px;
+  font-weight: 500;
+  margin-top: 4px;
+}
+.add-rule:active {
+  background: var(--bg);
+}
+.month-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.chip.on {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.delete-button {
+  margin-top: 24px;
+  width: 100%;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 600;
+}
+.delete-button:active {
+  background: var(--danger);
+  color: #fff;
+}
