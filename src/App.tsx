@@ -43,14 +43,22 @@ export function App() {
   }, [hydrated, uid, state.timezone]);
 
   // Foreground FCM messages: when the app is open, the SW's onBackgroundMessage
-  // doesn't fire — surface the notification ourselves.
+  // doesn't fire — surface the notification ourselves. We use the SW's
+  // showNotification rather than new Notification(...) because the latter
+  // throws on Android Chrome for installed PWAs.
   useEffect(() => {
     if (!uid) return;
-    return onForegroundMessage((payload) => {
+    return onForegroundMessage(async (payload) => {
       const title = payload.notification?.title ?? 'Plant Reminder';
       const body = payload.notification?.body ?? '';
-      if (Notification.permission === 'granted') {
-        new Notification(title, { body, icon: 'pwa-192x192.png' });
+      if (Notification.permission !== 'granted') return;
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const iconUrl = new URL('pwa-192x192.png', document.baseURI).href;
+        const badgeUrl = new URL('pwa-64x64.png', document.baseURI).href;
+        await reg.showNotification(title, { body, icon: iconUrl, badge: badgeUrl });
+      } catch (err) {
+        console.error('Failed to show foreground notification:', err);
       }
     });
   }, [uid]);
