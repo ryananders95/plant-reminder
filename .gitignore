@@ -20,3 +20,10 @@ dist-ssr
 
 # Claude Code local settings (per-machine, not for sharing)
 .claude/settings.local.json
+
+# Firebase service-account JSON (Phase 3 cron auth, used by restore-plants.ts)
+service-account.json
+
+# Local-cache exports used for one-off recovery
+localcache.json
+*.localcache.json
