@@ -7,6 +7,30 @@ import {
 } from '../lib/messaging';
 import type { AppState } from '../types';
 
+const TIME_OPTIONS: { value: string; label: string }[] = Array.from({ length: 48 }, (_, i) => {
+  const h = Math.floor(i / 2);
+  const m = (i % 2) * 30;
+  const value = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  const hour12 = h % 12 || 12;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  const label = `${hour12}:${String(m).padStart(2, '0')} ${ampm}`;
+  return { value, label };
+});
+
+// Snap a stored HH:MM (could be any minute from old time picker) to the nearest
+// half-hour value present in TIME_OPTIONS.
+function normalizeToHalfHour(t?: string): string | undefined {
+  if (!t) return undefined;
+  const match = /^(\d{1,2}):(\d{2})$/.exec(t);
+  if (!match) return undefined;
+  const h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  if (h < 0 || h > 23 || m < 0 || m > 59) return undefined;
+  const snappedMinute = m < 15 ? 0 : m < 45 ? 30 : 0;
+  const snappedHour = m >= 45 ? (h + 1) % 24 : h;
+  return `${String(snappedHour).padStart(2, '0')}:${String(snappedMinute).padStart(2, '0')}`;
+}
+
 export function SettingsScreen({
   uid,
   state,
@@ -132,19 +156,24 @@ export function SettingsScreen({
               <>
                 <label className="field">
                   <span className="field-label">Notification time</span>
-                  <input
-                    type="time"
-                    value={state.notificationTime || '08:00'}
+                  <select
+                    value={normalizeToHalfHour(state.notificationTime) || '08:00'}
                     onChange={(e) => handleTimeChange(e.target.value)}
-                  />
+                  >
+                    {TIME_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
 
                 <p className="hint">
                   Time zone: <strong>{detectedTz}</strong> (detected from your device).
                 </p>
                 <p className="hint">
-                  You'll get a push within ~30 minutes of your chosen time, but only on days
-                  when at least one plant has a task due or overdue.
+                  Reminders arrive at this time, but only on days when at least one plant has a
+                  task due or overdue.
                 </p>
               </>
             )}
