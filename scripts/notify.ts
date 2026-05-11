@@ -100,22 +100,29 @@ async function processUser(userId: string, user: UserDoc, now: Date): Promise<st
   result.responses.forEach((resp, i) => {
     if (resp.success) return;
     const code = (resp.error as { code?: string } | undefined)?.code;
+    const message = (resp.error as { message?: string } | undefined)?.message;
+    console.log(`  user ${userId.slice(0, 8)} token[${i}] error: ${code} - ${message}`);
     if (
       code === 'messaging/registration-token-not-registered' ||
       code === 'messaging/invalid-registration-token' ||
       code === 'messaging/invalid-argument'
     ) {
       badTokens.push(user.fcmTokens![i]);
-    } else {
-      console.warn(`  user ${userId.slice(0, 8)} token[${i}] failed: ${code}`);
     }
   });
 
-  const validTokens = user.fcmTokens.filter((t) => !badTokens.includes(t));
-  await db.collection('users').doc(userId).update({
-    lastNotifiedDay: local.date,
-    fcmTokens: validTokens,
-  });
+  const updates: Record<string, unknown> = {};
+  if (badTokens.length > 0) {
+    updates.fcmTokens = user.fcmTokens.filter((t) => !badTokens.includes(t));
+  }
+  // Only mark the user as notified today if at least one push succeeded —
+  // otherwise we'd dedupe future attempts that haven't actually delivered.
+  if (result.successCount > 0) {
+    updates.lastNotifiedDay = local.date;
+  }
+  if (Object.keys(updates).length > 0) {
+    await db.collection('users').doc(userId).update(updates);
+  }
 
   return `sent ${result.successCount}/${user.fcmTokens.length}, pruned ${badTokens.length}`;
 }
