@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { loadInitialState, patchUserDoc, saveState, subscribeToState } from './lib/storage';
 import { onForegroundMessage } from './lib/messaging';
 import { todayIso } from './lib/schedule';
+import { useNavStack } from './lib/useNavStack';
 import { signOut, useAuth } from './lib/auth';
 import type { AppState, Plant, TaskType } from './types';
 import { TodayView } from './components/TodayView';
@@ -12,17 +13,18 @@ import { InstallBanner } from './components/InstallBanner';
 import { HelpScreen } from './components/HelpScreen';
 import { SettingsScreen } from './components/SettingsScreen';
 
-type Tab = 'today' | 'plants';
-type Editing = Plant | 'new' | null;
+type Screen =
+  | { kind: 'today' }
+  | { kind: 'plants' }
+  | { kind: 'detail'; plant: Plant | null }
+  | { kind: 'help' }
+  | { kind: 'settings' };
 
 export function App() {
   const authState = useAuth();
   const [state, setState] = useState<AppState>(() => loadInitialState());
   const [hydrated, setHydrated] = useState(false);
-  const [tab, setTab] = useState<Tab>('today');
-  const [editing, setEditing] = useState<Editing>(null);
-  const [showHelp, setShowHelp] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const { top, push, pop } = useNavStack<Screen>({ kind: 'today' });
 
   const uid = authState && authState !== 'loading' ? authState.uid : null;
 
@@ -92,12 +94,12 @@ export function App() {
     const plants =
       idx >= 0 ? state.plants.map((p, i) => (i === idx ? plant : p)) : [...state.plants, plant];
     update({ ...state, plants });
-    setEditing(null);
+    pop();
   };
 
   const deletePlant = (id: string) => {
     update({ ...state, plants: state.plants.filter((p) => p.id !== id) });
-    setEditing(null);
+    pop();
   };
 
   const markDone = (plantId: string, taskType: TaskType) => {
@@ -110,7 +112,7 @@ export function App() {
     });
   };
 
-  if (showSettings) {
+  if (top.kind === 'settings') {
     return (
       <>
         <InstallBanner />
@@ -118,23 +120,23 @@ export function App() {
           uid={authState.uid}
           state={state}
           onUpdate={update}
-          onClose={() => setShowSettings(false)}
+          onClose={pop}
         />
       </>
     );
   }
 
-  if (showHelp) {
+  if (top.kind === 'help') {
     return (
       <>
         <InstallBanner />
-        <HelpScreen onClose={() => setShowHelp(false)} />
+        <HelpScreen onClose={pop} />
       </>
     );
   }
 
-  if (editing) {
-    const editingPlant = editing === 'new' ? null : editing;
+  if (top.kind === 'detail') {
+    const editingPlant = top.plant;
     return (
       <>
         <InstallBanner />
@@ -143,7 +145,7 @@ export function App() {
           plant={editingPlant}
           onSave={upsertPlant}
           onDelete={editingPlant ? () => deletePlant(editingPlant.id) : null}
-          onCancel={() => setEditing(null)}
+          onCancel={pop}
         />
       </>
     );
@@ -168,14 +170,14 @@ export function App() {
           </button>
           <button
             className="help-btn"
-            onClick={() => setShowSettings(true)}
+            onClick={() => push({ kind: 'settings' })}
             aria-label="Settings"
           >
             ⚙
           </button>
           <button
             className="help-btn"
-            onClick={() => setShowHelp(true)}
+            onClick={() => push({ kind: 'help' })}
             aria-label="Help"
           >
             ?
@@ -183,33 +185,40 @@ export function App() {
         </div>
       </header>
       <main className="main">
-        {tab === 'today' && (
+        {top.kind === 'today' && (
           <TodayView
             uid={authState.uid}
             plants={state.plants}
             onMarkDone={markDone}
             onOpen={(id) => {
               const p = state.plants.find((x) => x.id === id);
-              if (p) setEditing(p);
+              if (p) push({ kind: 'detail', plant: p });
             }}
           />
         )}
-        {tab === 'plants' && (
+        {top.kind === 'plants' && (
           <PlantList
             uid={authState.uid}
             plants={state.plants}
-            onSelect={(p) => setEditing(p)}
-            onAdd={() => setEditing('new')}
+            onSelect={(p) => push({ kind: 'detail', plant: p })}
+            onAdd={() => push({ kind: 'detail', plant: null })}
           />
         )}
       </main>
       <nav className="tabbar">
-        <button className={tab === 'today' ? 'tab active' : 'tab'} onClick={() => setTab('today')}>
+        <button
+          className={top.kind === 'today' ? 'tab active' : 'tab'}
+          onClick={() => {
+            if (top.kind === 'plants') pop();
+          }}
+        >
           Today
         </button>
         <button
-          className={tab === 'plants' ? 'tab active' : 'tab'}
-          onClick={() => setTab('plants')}
+          className={top.kind === 'plants' ? 'tab active' : 'tab'}
+          onClick={() => {
+            if (top.kind === 'today') push({ kind: 'plants' });
+          }}
         >
           Plants
         </button>
