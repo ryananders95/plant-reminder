@@ -90,11 +90,11 @@ This is the key step that solves the "unverified app" problem — Firebase Auth 
   ```
 - Click **Publish**.
 
-### 7. Paste me the firebaseConfig
+### 7. Wire the firebaseConfig into the app
 
-Send me the `firebaseConfig` object from step 3. I'll wire it into the app:
-- Locally: `.env` file (gitignored).
-- For the deployed build: GitHub Secrets, baked in at build time.
+Copy each value from the `firebaseConfig` object (step 3) into `.env.local` using the keys in `.env.example` (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, etc.). For the deployed build, set the same values as GitHub Secrets so `deploy.yml` can inject them at build time.
+
+The Firebase config inside `public/firebase-messaging-sw.js` is hardcoded (it ends up in the deployed bundle anyway). If you rotate the project, update it there too.
 
 ---
 
@@ -145,8 +145,4 @@ VITE_FIREBASE_VAPID_KEY=<paste the VAPID key here>
 
 ### 5. iOS-specific reminder for users
 
-This isn't an action item for you, just a fact: iPhone users **must install the PWA to their home screen** before push notifications can work. Safari tabs don't receive push on iOS. The in-app install banner already nudges them; the Settings screen also reminds them.
-
-### 6. Paste me the VAPID key
-
-Send me the VAPID key here and I'll add it to `.env.local` for you and wire up the rest of the client code (Settings screen with the time picker, FCM token registration, service worker, cron job, workflow).
+iPhone users **must install the PWA to their home screen** before push notifications can work. Safari tabs don't receive push on iOS. The in-app install banner and the Settings screen already nudge them.

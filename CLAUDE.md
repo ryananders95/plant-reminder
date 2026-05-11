@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **PlantPapi** — a personal-but-shareable PWA for houseplant care reminders. Hosted free on GitHub Pages at `https://ryananders95.github.io/plant-reminder/`, backed by a single Firebase project (`plant-reminder-a93bf`) for auth, data, photos, and push.
 
-See `ROADMAP.md` for the full phase plan and architectural rationale; `SETUP.md` for one-time Firebase Console setup (owner-only).
+See `SETUP.md` for one-time Firebase Console setup (owner-only).
 
 ## Commands
 
@@ -16,13 +16,15 @@ npm run dev          # Vite dev server on http://localhost:5173
 npm run build        # tsc -b && vite build (PWA assets auto-generated)
 npm run preview      # serve the production build locally
 npm run typecheck    # tsc -b --noEmit only
+npm test             # Vitest, run once (jsdom env)
+npm run test:watch   # Vitest watch mode
 
 # Cron / scripts (need service-account.json at project root)
 npx tsx scripts/notify.ts                              # send pushes for current window
 npx tsx scripts/restore-plants.ts <uid> <data.json>    # recover from a localStorage export
 ```
 
-There is no test suite.
+Tests live next to source as `*.test.ts(x)` (e.g. `src/lib/schedule.test.ts`, `src/components/PlantForm.test.tsx`). Component tests `vi.mock('../lib/photos', ...)` to avoid touching Firebase at import time. Vitest config + the jest-dom setup file live in `vite.config.ts` and `src/test/setup.ts`.
 
 The user's environment is **Windows + PowerShell**. Node was installed via `winget`; if `npm` errors with a script execution policy issue, the fix is `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned` (already done). Bash and the bundled Git Bash both work; pass `export PATH="/c/Program Files/nodejs:$PATH"` when invoking node tooling from Bash.
 

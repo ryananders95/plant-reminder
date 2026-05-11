@@ -12,10 +12,12 @@ export function TodayView({
   uid,
   plants,
   onMarkDone,
+  onOpen,
 }: {
   uid: string;
   plants: Plant[];
   onMarkDone: (plantId: string, taskType: TaskType) => void;
+  onOpen: (plantId: string) => void;
 }) {
   const today = new Date();
   const items = collectDueItems(plants, today, 7);
@@ -46,6 +48,7 @@ export function TodayView({
                   uid={uid}
                   group={group}
                   onMarkDone={onMarkDone}
+                  onOpen={onOpen}
                 />
               ))
             )}
@@ -60,6 +63,7 @@ export function TodayView({
                   uid={uid}
                   item={item}
                   onMarkDone={onMarkDone}
+                  onOpen={onOpen}
                 />
               ))}
             </section>
@@ -74,22 +78,29 @@ function PlantTodayCard({
   uid,
   group,
   onMarkDone,
+  onOpen,
 }: {
   uid: string;
   group: PlantDueGroup;
   onMarkDone: (plantId: string, taskType: TaskType) => void;
+  onOpen: (plantId: string) => void;
 }) {
   const { plant, tasks } = group;
   const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
     <div className="plant-card">
-      <div className="plant-card-header-row">
+      <button
+        type="button"
+        className="plant-card-header-row plant-card-header-button"
+        onClick={() => onOpen(plant.id)}
+        aria-label={`Open ${plant.name}`}
+      >
         <PlantThumb photoUrl={photoUrl} />
         <div className="plant-card-info">
           <div className="plant-name">{plant.name}</div>
           {plant.room && <div className="plant-card-room">{plant.room}</div>}
         </div>
-      </div>
+      </button>
       <div className="plant-card-actions">
         {tasks.map((task) => (
           <button
@@ -115,17 +126,24 @@ function ComingUpRow({
   uid,
   item,
   onMarkDone,
+  onOpen,
 }: {
   uid: string;
   item: DueItem;
   onMarkDone: (plantId: string, taskType: TaskType) => void;
+  onOpen: (plantId: string) => void;
 }) {
   const { plant, taskType, daysUntilDue } = item;
   const detail = `In ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`;
   const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
     <div className="plant-card">
-      <div className="plant-card-header-row">
+      <button
+        type="button"
+        className="plant-card-header-row plant-card-header-button"
+        onClick={() => onOpen(plant.id)}
+        aria-label={`Open ${plant.name}`}
+      >
         <PlantThumb photoUrl={photoUrl} />
         <div className="plant-card-info">
           <div className="plant-name">{plant.name}</div>
@@ -135,7 +153,7 @@ function ComingUpRow({
             {plant.room ? ` · ${plant.room}` : ''}
           </div>
         </div>
-      </div>
+      </button>
       <div className="plant-card-actions">
         <button className="complete-early" onClick={() => onMarkDone(plant.id, taskType)}>
           Complete early

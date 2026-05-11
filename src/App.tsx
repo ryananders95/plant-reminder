@@ -184,7 +184,15 @@ export function App() {
       </header>
       <main className="main">
         {tab === 'today' && (
-          <TodayView uid={authState.uid} plants={state.plants} onMarkDone={markDone} />
+          <TodayView
+            uid={authState.uid}
+            plants={state.plants}
+            onMarkDone={markDone}
+            onOpen={(id) => {
+              const p = state.plants.find((x) => x.id === id);
+              if (p) setEditing(p);
+            }}
+          />
         )}
         {tab === 'plants' && (
           <PlantList

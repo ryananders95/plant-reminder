@@ -9,6 +9,7 @@ import {
   type ScheduleRule,
   type TaskType,
 } from '../types';
+import { todayIso } from '../lib/schedule';
 import { PhotoPicker } from './PhotoPicker';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -33,11 +34,23 @@ export function PlantForm({
   const [schedules, setSchedules] = useState<Partial<Record<TaskType, ScheduleRule[]>>>(
     plant?.schedules ?? {},
   );
+  const [lastDone, setLastDone] = useState<Partial<Record<TaskType, string>>>(
+    plant?.lastDone ?? {},
+  );
 
   const setRulesForTask = (type: TaskType, rules: ScheduleRule[] | undefined) => {
     setSchedules((prev) => {
       const next = { ...prev };
       if (rules) next[type] = rules;
+      else delete next[type];
+      return next;
+    });
+  };
+
+  const setLastDoneForTask = (type: TaskType, value: string | undefined) => {
+    setLastDone((prev) => {
+      const next = { ...prev };
+      if (value) next[type] = value;
       else delete next[type];
       return next;
     });
@@ -54,7 +67,7 @@ export function PlantForm({
       notes: notes.trim() || undefined,
       photoFileId,
       schedules,
-      lastDone: plant?.lastDone ?? {},
+      lastDone,
     };
     onSave(result);
   };
@@ -98,6 +111,8 @@ export function PlantForm({
             taskType={type}
             rules={schedules[type]}
             onChange={(rules) => setRulesForTask(type, rules)}
+            lastDone={lastDone[type]}
+            onLastDoneChange={(value) => setLastDoneForTask(type, value)}
           />
         ))}
 
@@ -164,10 +179,14 @@ function ScheduleEditor({
   taskType,
   rules,
   onChange,
+  lastDone,
+  onLastDoneChange,
 }: {
   taskType: TaskType;
   rules: ScheduleRule[] | undefined;
   onChange: (rules: ScheduleRule[] | undefined) => void;
+  lastDone: string | undefined;
+  onLastDoneChange: (value: string | undefined) => void;
 }) {
   const enabled = !!rules;
 
@@ -230,6 +249,36 @@ function ScheduleEditor({
 
       {rules && (
         <div className="schedule-body">
+          <div className="last-done-row">
+            <label className="last-done-field">
+              <span className="field-label">Last done</span>
+              <input
+                type="date"
+                max={todayIso()}
+                value={lastDone ?? ''}
+                onChange={(e) => onLastDoneChange(e.target.value || undefined)}
+              />
+            </label>
+            <div className="last-done-actions">
+              <button
+                type="button"
+                className="last-done-btn"
+                onClick={() => onLastDoneChange(todayIso())}
+              >
+                Today
+              </button>
+              {lastDone && (
+                <button
+                  type="button"
+                  className="last-done-btn last-done-btn-clear"
+                  onClick={() => onLastDoneChange(undefined)}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+          </div>
+
           {rules.map((rule, idx) => (
             <div key={idx} className="rule-card">
               <div className="rule-header">

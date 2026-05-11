@@ -351,6 +351,25 @@ textarea {
   gap: 12px;
   min-width: 0;
 }
+.plant-card-header-button {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.plant-card-header-button:active {
+  opacity: 0.7;
+}
+.plant-card-header-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 .plant-card-info {
   flex: 1;
   min-width: 0;
@@ -476,6 +495,9 @@ textarea {
 }
 .photo-tile {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 128px;
   height: 128px;
   border-radius: 50%;
@@ -720,6 +742,47 @@ textarea {
 }
 .schedule-body {
   margin-top: 8px;
+}
+.last-done-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.last-done-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+.last-done-field input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+.last-done-actions {
+  display: flex;
+  gap: 6px;
+}
+.last-done-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.last-done-btn:active {
+  opacity: 0.7;
+}
+.last-done-btn-clear {
+  color: var(--muted);
 }
 .rule-card {
   border: 1px solid var(--border);
