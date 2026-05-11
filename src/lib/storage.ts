@@ -1,4 +1,4 @@
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { CURRENT_VERSION, INITIAL_STATE, type AppState } from '../types';
 
@@ -57,5 +57,16 @@ export async function saveState(uid: string, state: AppState): Promise<void> {
     await setDoc(doc(db, 'users', uid), state, { merge: true });
   } catch (err) {
     console.error('Firestore save error:', err);
+  }
+}
+
+// Patch only the specified fields on the user doc. Safer than saveState when
+// you don't have authoritative state yet (e.g., before Firestore subscription
+// has populated React state).
+export async function patchUserDoc(uid: string, patch: Partial<AppState>): Promise<void> {
+  try {
+    await updateDoc(doc(db, 'users', uid), patch);
+  } catch (err) {
+    console.error('Firestore patch error:', err);
   }
 }

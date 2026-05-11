@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadInitialState, saveState, subscribeToState } from './lib/storage';
+import { loadInitialState, patchUserDoc, saveState, subscribeToState } from './lib/storage';
 import { todayIso } from './lib/schedule';
 import { signOut, useAuth } from './lib/auth';
 import type { AppState, Plant, TaskType } from './types';
@@ -17,6 +17,7 @@ type Editing = Plant | 'new' | null;
 export function App() {
   const authState = useAuth();
   const [state, setState] = useState<AppState>(() => loadInitialState());
+  const [hydrated, setHydrated] = useState(false);
   const [tab, setTab] = useState<Tab>('today');
   const [editing, setEditing] = useState<Editing>(null);
   const [showHelp, setShowHelp] = useState(false);
@@ -26,15 +27,19 @@ export function App() {
 
   useEffect(() => {
     if (!uid) return;
-    return subscribeToState(uid, setState);
+    setHydrated(false);
+    return subscribeToState(uid, (s) => {
+      setState(s);
+      setHydrated(true);
+    });
   }, [uid]);
 
   useEffect(() => {
-    if (!uid || state.timezone) return;
+    if (!hydrated || !uid || state.timezone) return;
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (!detected) return;
-    void saveState(uid, { ...state, timezone: detected });
-  }, [uid, state]);
+    void patchUserDoc(uid, { timezone: detected });
+  }, [hydrated, uid, state.timezone]);
 
   if (authState === 'loading') {
     return (
