@@ -98,6 +98,55 @@ Send me the `firebaseConfig` object from step 3. I'll wire it into the app:
 
 ---
 
-## Phase 3 — Cloud Messaging + cron (later)
+## Phase 3 — Cloud Messaging + cron (push notifications)
 
-Will be added when we start Phase 3. Same Firebase project.
+This adds daily push notifications. Each user can pick their own preferred notification time in the app's Settings screen. The GitHub Actions cron runs every 30 minutes and only pings users whose local time matches their preferred slot.
+
+### 1. Generate a Web Push VAPID key
+
+Web push needs a public/private key pair so the browser can verify push messages came from your app.
+
+- Firebase Console → ⚙ (top left) → **Project settings**.
+- **Cloud Messaging** tab.
+- Scroll to **Web Push certificates**.
+- If a key is already listed, copy its **Key pair** value.
+- If not, click **Generate key pair**, then copy the resulting value.
+
+The VAPID key is a long base64 string like `BNdGq…`. Save it somewhere temporarily — you'll paste it into a GitHub Secret and your `.env.local`.
+
+### 2. Generate a service account private key
+
+The GitHub Actions cron impersonates your Firebase project to send pushes; it needs a service-account key for that.
+
+- Same **Project settings** screen → **Service accounts** tab.
+- Make sure "Firebase Admin SDK" is selected (it usually is by default).
+- Click **Generate new private key** → confirm in the dialog. A JSON file downloads.
+
+**Treat this JSON as a secret** — anyone with it can read/write your Firebase project. Do **not** commit it to the repo. We'll paste it directly into a GitHub Secret in the next step.
+
+### 3. Add two new GitHub Secrets
+
+Go to https://github.com/ryananders95/plant-reminder/settings/secrets/actions → **New repository secret**:
+
+| Name | Value |
+|---|---|
+| `VITE_FIREBASE_VAPID_KEY` | The VAPID key string from step 1. |
+| `FIREBASE_SERVICE_ACCOUNT` | **Open the downloaded JSON file in a text editor, copy its entire contents, and paste it as the secret value.** |
+
+### 4. Add the VAPID key to `.env.local` (for local dev)
+
+Open `C:\Users\ryana\PlantReminder\.env.local` and add a line:
+
+```
+VITE_FIREBASE_VAPID_KEY=<paste the VAPID key here>
+```
+
+(The service account is server-side only — never goes in `.env.local`.)
+
+### 5. iOS-specific reminder for users
+
+This isn't an action item for you, just a fact: iPhone users **must install the PWA to their home screen** before push notifications can work. Safari tabs don't receive push on iOS. The in-app install banner already nudges them; the Settings screen also reminds them.
+
+### 6. Paste me the VAPID key
+
+Send me the VAPID key here and I'll add it to `.env.local` for you and wire up the rest of the client code (Settings screen with the time picker, FCM token registration, service worker, cron job, workflow).

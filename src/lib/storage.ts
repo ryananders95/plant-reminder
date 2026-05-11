@@ -52,7 +52,9 @@ export function subscribeToState(uid: string, onChange: (state: AppState) => voi
 export async function saveState(uid: string, state: AppState): Promise<void> {
   writeCache(state);
   try {
-    await setDoc(doc(db, 'users', uid), state);
+    // merge: true so dedicated writers (e.g., FCM token mgmt, cron lastNotifiedDay)
+    // don't get clobbered by an app-side full-state write.
+    await setDoc(doc(db, 'users', uid), state, { merge: true });
   } catch (err) {
     console.error('Firestore save error:', err);
   }

@@ -33,6 +33,11 @@ export interface Plant {
 export interface AppState {
   plants: Plant[];
   version: number;
+  notificationsEnabled?: boolean;
+  notificationTime?: string; // "HH:MM" 24-hour, in user's local timezone
+  timezone?: string; // IANA tz, e.g. "America/New_York"
+  fcmTokens?: string[]; // managed by registerFcmToken / unregisterFcmToken
+  lastNotifiedDay?: string; // managed by cron only, "yyyy-MM-dd" in user's tz
 }
 
 export const CURRENT_VERSION = 2;

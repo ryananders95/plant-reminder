@@ -9,6 +9,7 @@ import { PlantForm } from './components/PlantForm';
 import { SignInScreen } from './components/SignInButton';
 import { InstallBanner } from './components/InstallBanner';
 import { HelpScreen } from './components/HelpScreen';
+import { SettingsScreen } from './components/SettingsScreen';
 
 type Tab = 'today' | 'plants';
 type Editing = Plant | 'new' | null;
@@ -19,6 +20,7 @@ export function App() {
   const [tab, setTab] = useState<Tab>('today');
   const [editing, setEditing] = useState<Editing>(null);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const uid = authState && authState !== 'loading' ? authState.uid : null;
 
@@ -26,6 +28,13 @@ export function App() {
     if (!uid) return;
     return subscribeToState(uid, setState);
   }, [uid]);
+
+  useEffect(() => {
+    if (!uid || state.timezone) return;
+    const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!detected) return;
+    void saveState(uid, { ...state, timezone: detected });
+  }, [uid, state]);
 
   if (authState === 'loading') {
     return (
@@ -73,6 +82,20 @@ export function App() {
     });
   };
 
+  if (showSettings) {
+    return (
+      <>
+        <InstallBanner />
+        <SettingsScreen
+          uid={authState.uid}
+          state={state}
+          onUpdate={update}
+          onClose={() => setShowSettings(false)}
+        />
+      </>
+    );
+  }
+
   if (showHelp) {
     return (
       <>
@@ -114,6 +137,13 @@ export function App() {
             aria-label="Sign out"
           >
             {displayName}
+          </button>
+          <button
+            className="help-btn"
+            onClick={() => setShowSettings(true)}
+            aria-label="Settings"
+          >
+            ⚙
           </button>
           <button
             className="help-btn"

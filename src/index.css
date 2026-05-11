@@ -607,6 +607,24 @@ textarea {
   margin-bottom: 6px;
 }
 
+/* Settings */
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.settings-toggle input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .form-body {
   flex: 1;
   padding: 16px;

@@ -74,6 +74,18 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
           with their own accounts.
         </p>
 
+        <h3 className="help-heading">Daily reminders</h3>
+        <p>
+          Tap the <strong>⚙</strong> button in the header to open Settings, then turn on{' '}
+          <em>Push me when plants need attention</em> and pick your preferred time. You'll only
+          get a push on days that have at least one plant due or overdue.
+        </p>
+        <p>
+          <strong>iPhone</strong>: you must install the app to your home screen first (Share →
+          Add to Home Screen), then open it from the home screen, before notifications can
+          work.
+        </p>
+
         <h3 className="help-heading">Sign out</h3>
         <p>Tap your name in the top right corner of any screen to sign out.</p>
       </main>
