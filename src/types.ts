@@ -1,4 +1,7 @@
-export const TASK_TYPES = ['water', 'fertilize', 'mist'] as const;
+// Order matters: this drives the display order for schedule editors in
+// PlantForm, task buttons in TodayView cards, the comma-joined summary in
+// PlantList, and tie-breaks in schedule.ts sorts.
+export const TASK_TYPES = ['water', 'mist', 'fertilize'] as const;
 export type TaskType = (typeof TASK_TYPES)[number];
 
 export const TASK_LABELS: Record<TaskType, string> = {

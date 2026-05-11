@@ -66,7 +66,12 @@ export function collectDueItems(plants: Plant[], today: Date, withinDays = 3): D
       if (days <= withinDays) items.push({ plant, taskType, daysUntilDue: days });
     }
   }
-  items.sort((a, b) => a.daysUntilDue - b.daysUntilDue || a.plant.name.localeCompare(b.plant.name));
+  items.sort(
+    (a, b) =>
+      a.daysUntilDue - b.daysUntilDue ||
+      a.plant.name.localeCompare(b.plant.name) ||
+      TASK_TYPES.indexOf(a.taskType) - TASK_TYPES.indexOf(b.taskType),
+  );
   return items;
 }
 

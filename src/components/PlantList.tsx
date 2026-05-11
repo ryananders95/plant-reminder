@@ -1,5 +1,5 @@
 import { usePhotoUrl } from '../lib/photos';
-import { TASK_EMOJIS, TASK_LABELS, type Plant, type TaskType } from '../types';
+import { TASK_EMOJIS, TASK_LABELS, TASK_TYPES, type Plant, type TaskType } from '../types';
 
 export function PlantList({
   uid,
@@ -61,6 +61,7 @@ function PlantRow({
     Object.keys(plant.schedules).length === 0
       ? 'No schedules'
       : (Object.keys(plant.schedules) as TaskType[])
+          .sort((a, b) => TASK_TYPES.indexOf(a) - TASK_TYPES.indexOf(b))
           .map((t) => `${TASK_EMOJIS[t]} ${TASK_LABELS[t]}`)
           .join(' · ');
 
