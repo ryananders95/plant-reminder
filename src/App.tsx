@@ -49,8 +49,9 @@ export function App() {
   useEffect(() => {
     if (!uid) return;
     return onForegroundMessage(async (payload) => {
-      const title = payload.notification?.title ?? 'Plant Reminder';
-      const body = payload.notification?.body ?? '';
+      const data = payload.data ?? {};
+      const title = data.title ?? 'Plant Reminder';
+      const body = data.body ?? '';
       if (Notification.permission !== 'granted') return;
       try {
         const reg = await navigator.serviceWorker.ready;

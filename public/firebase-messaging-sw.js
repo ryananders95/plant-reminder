@@ -21,13 +21,15 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const title = (payload.notification && payload.notification.title) || 'Plant Reminder';
-  const body = (payload.notification && payload.notification.body) || '';
+  // We send data-only payloads, so read from payload.data.
+  const data = payload.data || {};
+  const title = data.title || 'Plant Reminder';
+  const body = data.body || '';
   self.registration.showNotification(title, {
     body,
     icon: '/plant-reminder/pwa-192x192.png',
     badge: '/plant-reminder/pwa-64x64.png',
-    data: payload.data,
+    data,
   });
 });
 

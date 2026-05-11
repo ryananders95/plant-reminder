@@ -90,9 +90,13 @@ async function processUser(userId: string, user: UserDoc, now: Date): Promise<st
       ? `${plantNames[0]} needs attention`
       : `${plantNames.length} plants need attention`;
 
+  // Send as data-only (no `notification` field). Notification-field payloads
+  // are auto-displayed by Firebase in the SW with default browser styling,
+  // which then double-fires alongside our own onBackgroundMessage handler.
+  // Data-only payloads put our handler in sole control of display.
   const result = await messaging.sendEachForMulticast({
     tokens: user.fcmTokens,
-    notification: { title: 'Plant Reminder', body },
+    data: { title: 'Plant Reminder', body },
     webpush: { fcmOptions: { link: 'https://ryananders95.github.io/plant-reminder/' } },
   });
 
