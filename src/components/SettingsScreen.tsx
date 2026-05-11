@@ -141,7 +141,7 @@ export function SettingsScreen({
                 onChange={handleToggle}
                 disabled={busy || supported === null}
               />
-              <span>Push me when plants need attention</span>
+              <span>Send a notification when plants need attention</span>
             </label>
 
             {permission === 'denied' && (

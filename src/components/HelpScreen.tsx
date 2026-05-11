@@ -86,9 +86,10 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
         <h3 className="help-heading">Daily reminders</h3>
         <p>
           Tap the <strong>⚙</strong> button in the header to open Settings, then turn on{' '}
-          <em>Push me when plants need attention</em>. Pick a preferred time from the dropdown
-          (half-hour slots, displayed in your local timezone). You'll only get a push on days
-          that have at least one plant due or overdue — never on quiet days.
+          <em>Send a notification when plants need attention</em>. Pick a preferred time from
+          the dropdown (half-hour slots, displayed in your local timezone). You'll only get a
+          notification on days that have at least one plant due or overdue — never on quiet
+          days.
         </p>
         <p>
           <strong>iPhone</strong>: you must install the app to your home screen first (Share →
