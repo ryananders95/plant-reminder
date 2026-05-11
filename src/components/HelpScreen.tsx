@@ -27,7 +27,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
 
         <h3 className="help-heading">Schedules</h3>
         <p>
-          Each plant can have its own water, fertilize, and mist schedules — independently. Each
+          Each plant can have its own water, mist, and fertilize schedules — independently. Each
           task supports <strong>multiple schedule rules</strong>, useful for seasonal care.
         </p>
         <p>
@@ -47,6 +47,15 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
         <p>
           If a task isn't needed during some months (e.g., fertilizer in winter), simply leave
           those months unassigned to any rule.
+        </p>
+
+        <h3 className="help-heading">Photos</h3>
+        <p>
+          When editing a plant, tap <strong>📷 Take photo</strong> to snap a new picture with
+          your camera, or <strong>🖼️ Choose photo</strong> to pick from your library. Photos
+          are auto-resized so they don't bloat storage, and appear as small thumbnails next to
+          the plant in the Today and Plants tabs. Tap <strong>Remove</strong> on the edit form
+          to clear a photo.
         </p>
 
         <h3 className="help-heading">Install on your phone</h3>
@@ -77,8 +86,9 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
         <h3 className="help-heading">Daily reminders</h3>
         <p>
           Tap the <strong>⚙</strong> button in the header to open Settings, then turn on{' '}
-          <em>Push me when plants need attention</em> and pick your preferred time. You'll only
-          get a push on days that have at least one plant due or overdue.
+          <em>Push me when plants need attention</em>. Pick a preferred time from the dropdown
+          (half-hour slots, displayed in your local timezone). You'll only get a push on days
+          that have at least one plant due or overdue — never on quiet days.
         </p>
         <p>
           <strong>iPhone</strong>: you must install the app to your home screen first (Share →
