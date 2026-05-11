@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { loadInitialState, patchUserDoc, saveState, subscribeToState } from './lib/storage';
+import { onForegroundMessage } from './lib/messaging';
 import { todayIso } from './lib/schedule';
 import { signOut, useAuth } from './lib/auth';
 import type { AppState, Plant, TaskType } from './types';
@@ -40,6 +41,19 @@ export function App() {
     if (!detected) return;
     void patchUserDoc(uid, { timezone: detected });
   }, [hydrated, uid, state.timezone]);
+
+  // Foreground FCM messages: when the app is open, the SW's onBackgroundMessage
+  // doesn't fire — surface the notification ourselves.
+  useEffect(() => {
+    if (!uid) return;
+    return onForegroundMessage((payload) => {
+      const title = payload.notification?.title ?? 'Plant Reminder';
+      const body = payload.notification?.body ?? '';
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: 'pwa-192x192.png' });
+      }
+    });
+  }, [uid]);
 
   if (authState === 'loading') {
     return (

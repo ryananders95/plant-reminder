@@ -93,7 +93,7 @@ async function processUser(userId: string, user: UserDoc, now: Date): Promise<st
   const result = await messaging.sendEachForMulticast({
     tokens: user.fcmTokens,
     notification: { title: 'Plant Reminder', body },
-    webpush: { fcmOptions: { link: '/' } },
+    webpush: { fcmOptions: { link: 'https://ryananders95.github.io/plant-reminder/' } },
   });
 
   const badTokens: string[] = [];
