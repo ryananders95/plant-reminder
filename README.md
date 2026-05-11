@@ -1,4 +1,4 @@
-# Plant Reminder
+# PlantPapi
 
 A personal Progressive Web App for reminding yourself to water, fertilize, and mist your houseplants.
 

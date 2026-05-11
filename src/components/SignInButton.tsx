@@ -35,7 +35,7 @@ export function SignInScreen() {
     <div className="signin">
       <div className="signin-card">
         <div className="signin-icon">🌱</div>
-        <h1>Plant Reminder</h1>
+        <h1>PlantPapi</h1>
         <p>Reminders to water, fertilize, and mist your houseplants.</p>
         <SignInButton />
       </div>

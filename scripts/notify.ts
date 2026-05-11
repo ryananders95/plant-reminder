@@ -96,7 +96,7 @@ async function processUser(userId: string, user: UserDoc, now: Date): Promise<st
   // Data-only payloads put our handler in sole control of display.
   const result = await messaging.sendEachForMulticast({
     tokens: user.fcmTokens,
-    data: { title: 'Plant Reminder', body },
+    data: { title: 'PlantPapi', body },
     webpush: { fcmOptions: { link: 'https://ryananders95.github.io/plant-reminder/' } },
   });
 

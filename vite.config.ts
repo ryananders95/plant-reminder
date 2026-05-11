@@ -13,8 +13,8 @@ export default defineConfig({
         config: true,
       },
       manifest: {
-        name: 'Plant Reminder',
-        short_name: 'Plants',
+        name: 'PlantPapi',
+        short_name: 'PlantPapi',
         description: 'Reminders to water, fertilize, and mist your houseplants',
         theme_color: '#2d6a4f',
         background_color: '#f6f8f6',

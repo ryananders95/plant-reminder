@@ -1,4 +1,4 @@
-# Plant Reminder — One-time Setup
+# PlantPapi — One-time Setup
 
 Everything in this doc is **owner-only** (you, Ryan). Friends and family who use the deployed app just tap "Sign in with Google" — they don't see any of this.
 
@@ -12,7 +12,7 @@ We use a single Firebase project for: sign-in, plant data (Firestore), photos (S
 
 - Open https://console.firebase.google.com/
 - Click **Add project** (or "Create a project").
-- **Project name**: `Plant Reminder`. Click **Continue**.
+- **Project name**: `PlantPapi`. Click **Continue**.
 - **Google Analytics**: **disable** it (we don't need it). Click **Create project**. Wait ~30 seconds, then **Continue**.
 
 ### 2. Enable Google as a sign-in provider
@@ -29,7 +29,7 @@ This is the key step that solves the "unverified app" problem — Firebase Auth 
 
 - In the left sidebar, click the **gear icon** at the very top → **Project settings**.
 - Scroll down to **Your apps** → click the **</>** (Web) icon.
-- **App nickname**: `Plant Reminder Web`.
+- **App nickname**: `PlantPapi Web`.
 - **Do NOT** check "Also set up Firebase Hosting."
 - Click **Register app**.
 - You'll see a code snippet with a `firebaseConfig` object — looks like:

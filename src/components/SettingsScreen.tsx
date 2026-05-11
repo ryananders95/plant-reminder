@@ -125,7 +125,7 @@ export function SettingsScreen({
             {isIOS && !isStandalone ? (
               <>
                 To use push notifications on iPhone, first tap Share →{' '}
-                <strong>Add to Home Screen</strong>, then open Plant Reminder from your home
+                <strong>Add to Home Screen</strong>, then open PlantPapi from your home
                 screen and come back here.
               </>
             ) : (
@@ -148,7 +148,7 @@ export function SettingsScreen({
               <p className="hint">
                 Notifications are blocked for this site. Enable them in your browser settings
                 (Chrome: tap the lock icon in the address bar → Notifications; Safari: Settings
-                → Plant Reminder → Notifications) and toggle the switch again.
+                → PlantPapi → Notifications) and toggle the switch again.
               </p>
             )}
 
@@ -184,7 +184,7 @@ export function SettingsScreen({
 
         <h3 className="help-heading">Tips</h3>
         <ul>
-          <li>Install Plant Reminder to your home screen for the most reliable delivery.</li>
+          <li>Install PlantPapi to your home screen for the most reliable delivery.</li>
           <li>
             iPhone: you must add the app to your home screen and open it from there before
             notifications can work.

@@ -10,7 +10,7 @@ export function HelpScreen({ onClose }: { onClose: () => void }) {
       </header>
 
       <main className="form-body help-body">
-        <h3 className="help-heading">How to use Plant Reminder</h3>
+        <h3 className="help-heading">How to use PlantPapi</h3>
         <p>
           The <strong>Today</strong> tab shows what needs attention. Plants with tasks that are
           due today or overdue appear as cards with task buttons. Tap a button (

@@ -59,7 +59,7 @@ export function InstallBanner() {
   };
 
   return (
-    <div className="install-banner" role="region" aria-label="Install Plant Reminder">
+    <div className="install-banner" role="region" aria-label="Install PlantPapi">
       <span className="install-banner-icon" aria-hidden="true">
         📲
       </span>
@@ -70,7 +70,7 @@ export function InstallBanner() {
             <strong>Add to Home Screen</strong>
           </>
         ) : deferred ? (
-          <>Install Plant Reminder for offline use and push notifications.</>
+          <>Install PlantPapi for offline use and push notifications.</>
         ) : (
           <>
             Install for the best experience: open Chrome menu (⋮) → <strong>Install app</strong>.

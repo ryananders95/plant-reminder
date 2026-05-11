@@ -23,7 +23,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   // We send data-only payloads, so read from payload.data.
   const data = payload.data || {};
-  const title = data.title || 'Plant Reminder';
+  const title = data.title || 'PlantPapi';
   const body = data.body || '';
   self.registration.showNotification(title, {
     body,

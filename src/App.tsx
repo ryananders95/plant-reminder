@@ -50,7 +50,7 @@ export function App() {
     if (!uid) return;
     return onForegroundMessage(async (payload) => {
       const data = payload.data ?? {};
-      const title = data.title ?? 'Plant Reminder';
+      const title = data.title ?? 'PlantPapi';
       const body = data.body ?? '';
       if (Notification.permission !== 'granted') return;
       try {
@@ -155,12 +155,12 @@ export function App() {
     <div className="app">
       <InstallBanner />
       <header className="header">
-        <h1>Plant Reminder</h1>
+        <h1>PlantPapi</h1>
         <div className="header-actions">
           <button
             className="signout-chip"
             onClick={() => {
-              if (window.confirm(`Sign out of Plant Reminder?`)) void signOut();
+              if (window.confirm(`Sign out of PlantPapi?`)) void signOut();
             }}
             aria-label="Sign out"
           >
