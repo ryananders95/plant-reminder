@@ -83,10 +83,12 @@ function PlantTodayCard({
   const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
     <div className="plant-card">
-      <PlantThumb photoUrl={photoUrl} />
-      <div className="plant-card-info">
-        <div className="plant-name">{plant.name}</div>
-        {plant.room && <div className="plant-card-room">{plant.room}</div>}
+      <div className="plant-card-header-row">
+        <PlantThumb photoUrl={photoUrl} />
+        <div className="plant-card-info">
+          <div className="plant-name">{plant.name}</div>
+          {plant.room && <div className="plant-card-room">{plant.room}</div>}
+        </div>
       </div>
       <div className="plant-card-actions">
         {tasks.map((task) => (
@@ -122,22 +124,23 @@ function ComingUpRow({
   const detail = `In ${daysUntilDue} day${daysUntilDue === 1 ? '' : 's'}`;
   const photoUrl = usePhotoUrl(uid, plant.photoFileId);
   return (
-    <div className="duerow">
-      <PlantThumb photoUrl={photoUrl} />
-      <div className="duerow-info">
-        <div className="plant-name">{plant.name}</div>
-        <div className="task-meta">
-          <span aria-hidden="true">{TASK_EMOJIS[taskType]}</span> {TASK_LABELS[taskType]} ·{' '}
-          {detail}
-          {plant.room ? ` · ${plant.room}` : ''}
+    <div className="plant-card">
+      <div className="plant-card-header-row">
+        <PlantThumb photoUrl={photoUrl} />
+        <div className="plant-card-info">
+          <div className="plant-name">{plant.name}</div>
+          <div className="plant-card-room">
+            <span aria-hidden="true">{TASK_EMOJIS[taskType]}</span> {TASK_LABELS[taskType]} ·{' '}
+            {detail}
+            {plant.room ? ` · ${plant.room}` : ''}
+          </div>
         </div>
       </div>
-      <button
-        className="complete-early"
-        onClick={() => onMarkDone(plant.id, taskType)}
-      >
-        Complete early
-      </button>
+      <div className="plant-card-actions">
+        <button className="complete-early" onClick={() => onMarkDone(plant.id, taskType)}>
+          Complete early
+        </button>
+      </div>
     </div>
   );
 }

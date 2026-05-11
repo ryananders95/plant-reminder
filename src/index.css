@@ -334,7 +334,7 @@ textarea {
   background: var(--primary-dark);
 }
 
-/* Plant-grouped Today cards */
+/* Plant-grouped Today / Coming Up cards */
 .plant-card {
   display: flex;
   flex-direction: column;
@@ -345,7 +345,14 @@ textarea {
   padding: 12px 14px;
   margin-bottom: 8px;
 }
+.plant-card-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
 .plant-card-info {
+  flex: 1;
   min-width: 0;
 }
 .plant-card-room {
@@ -357,6 +364,7 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  justify-content: flex-end;
 }
 .task-button {
   border: none;

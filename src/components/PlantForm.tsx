@@ -142,7 +142,6 @@ function IntervalDaysInput({
       max={365}
       inputMode="numeric"
       value={text}
-      onFocus={(e) => e.currentTarget.select()}
       onChange={(e) => {
         const next = e.target.value;
         setText(next);
