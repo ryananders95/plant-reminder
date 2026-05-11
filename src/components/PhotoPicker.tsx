@@ -10,7 +10,8 @@ export function PhotoPicker({
   photoId: string | undefined;
   onChange: (next: string | undefined) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const cameraRef = useRef<HTMLInputElement | null>(null);
+  const libraryRef = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState<'uploading' | 'removing' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const url = usePhotoUrl(uid, photoId);
@@ -51,24 +52,26 @@ export function PhotoPicker({
 
   return (
     <div className="photo-picker">
-      <button
-        type="button"
-        className="photo-tile"
-        onClick={() => inputRef.current?.click()}
-        disabled={busy !== null}
-        aria-label={photoId ? 'Replace photo' : 'Add photo'}
-      >
+      <div className="photo-tile" aria-label={photoId ? 'Plant photo' : 'No plant photo'}>
         {url ? <img src={url} alt="" /> : <span className="photo-tile-placeholder">🪴</span>}
         {busy === 'uploading' && <span className="photo-tile-overlay">Uploading…</span>}
-      </button>
+      </div>
       <div className="photo-picker-actions">
         <button
           type="button"
           className="photo-picker-btn"
-          onClick={() => inputRef.current?.click()}
+          onClick={() => cameraRef.current?.click()}
           disabled={busy !== null}
         >
-          {photoId ? 'Replace' : 'Add photo'}
+          <span aria-hidden="true">📷</span> Take photo
+        </button>
+        <button
+          type="button"
+          className="photo-picker-btn"
+          onClick={() => libraryRef.current?.click()}
+          disabled={busy !== null}
+        >
+          <span aria-hidden="true">🖼️</span> Choose photo
         </button>
         {photoId && (
           <button
@@ -82,10 +85,17 @@ export function PhotoPicker({
         )}
       </div>
       <input
-        ref={inputRef}
+        ref={cameraRef}
         type="file"
         accept="image/*"
         capture="environment"
+        onChange={handleFile}
+        style={{ display: 'none' }}
+      />
+      <input
+        ref={libraryRef}
+        type="file"
+        accept="image/*"
         onChange={handleFile}
         style={{ display: 'none' }}
       />

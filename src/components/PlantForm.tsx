@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ALL_MONTHS,
@@ -66,9 +66,7 @@ export function PlantForm({
           Cancel
         </button>
         <h2>{plant ? 'Edit Plant' : 'New Plant'}</h2>
-        <button className="header-btn primary" onClick={handleSave} disabled={!canSave}>
-          Save
-        </button>
+        <span className="header-btn header-btn-spacer" aria-hidden="true" />
       </header>
 
       <main className="form-body">
@@ -114,7 +112,52 @@ export function PlantForm({
           </button>
         )}
       </main>
+
+      <footer className="form-footer">
+        <button className="form-footer-save" onClick={handleSave} disabled={!canSave}>
+          Save
+        </button>
+      </footer>
     </div>
+  );
+}
+
+function IntervalDaysInput({
+  value,
+  onChange,
+}: {
+  value: number;
+  onChange: (next: number) => void;
+}) {
+  const [text, setText] = useState(String(value));
+
+  useEffect(() => {
+    setText(String(value));
+  }, [value]);
+
+  return (
+    <input
+      type="number"
+      min={1}
+      max={365}
+      inputMode="numeric"
+      value={text}
+      onFocus={(e) => e.currentTarget.select()}
+      onChange={(e) => {
+        const next = e.target.value;
+        setText(next);
+        const n = parseInt(next, 10);
+        if (!Number.isNaN(n) && n >= 1 && n <= 365) {
+          onChange(n);
+        }
+      }}
+      onBlur={() => {
+        const n = parseInt(text, 10);
+        if (Number.isNaN(n) || n < 1 || n > 365) {
+          setText(String(value));
+        }
+      }}
+    />
   );
 }
 
@@ -193,18 +236,9 @@ function ScheduleEditor({
               <div className="rule-header">
                 <label className="field inline">
                   <span className="field-label">Every</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={365}
-                    inputMode="numeric"
+                  <IntervalDaysInput
                     value={rule.intervalDays}
-                    onChange={(e) =>
-                      updateRule(idx, {
-                        ...rule,
-                        intervalDays: Math.max(1, parseInt(e.target.value, 10) || 1),
-                      })
-                    }
+                    onChange={(n) => updateRule(idx, { ...rule, intervalDays: n })}
                   />
                   <span>days</span>
                 </label>

@@ -337,9 +337,8 @@ textarea {
 /* Plant-grouped Today cards */
 .plant-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -347,7 +346,6 @@ textarea {
   margin-bottom: 8px;
 }
 .plant-card-info {
-  flex: 1;
   min-width: 0;
 }
 .plant-card-room {
@@ -359,8 +357,6 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  justify-content: flex-end;
-  flex-shrink: 0;
 }
 .task-button {
   border: none;
@@ -548,6 +544,7 @@ textarea {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  --footer-h: calc(72px + env(safe-area-inset-bottom));
 }
 .form-header {
   display: flex;
@@ -629,7 +626,36 @@ textarea {
   flex: 1;
   padding: 16px;
   overflow-y: auto;
-  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  /* Leave room so the sticky save bar never covers the last content. */
+  padding-bottom: calc(var(--footer-h) + 16px);
+}
+
+.form-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 10;
+}
+.form-footer-save {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.form-footer-save:disabled {
+  opacity: 0.5;
+}
+.form-footer-save:active:not(:disabled) {
+  background: var(--primary-dark);
 }
 
 .field {
