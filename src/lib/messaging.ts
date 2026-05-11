@@ -39,12 +39,52 @@ let swRegPromise: Promise<ServiceWorkerRegistration> | null = null;
 
 function getFcmServiceWorker(): Promise<ServiceWorkerRegistration> {
   if (!swRegPromise) {
-    // Resolve absolute path so the browser uses the right scope even when
-    // the site lives at a sub-path like /plant-reminder/.
-    const swUrl = new URL('firebase-messaging-sw.js', document.baseURI).pathname;
-    swRegPromise = navigator.serviceWorker.register(swUrl);
+    swRegPromise = registerAndActivate();
   }
   return swRegPromise;
+}
+
+async function registerAndActivate(): Promise<ServiceWorkerRegistration> {
+  // Resolve absolute paths so the browser uses the right scope even when the
+  // site lives at a sub-path like /plant-reminder/. We use an explicit nested
+  // scope ("firebase-cloud-messaging-push-scope/") so this SW doesn't replace
+  // the vite-plugin-pwa SW at the site root scope.
+  const swUrl = new URL('firebase-messaging-sw.js', document.baseURI).pathname;
+  const scope = new URL('firebase-cloud-messaging-push-scope/', document.baseURI).pathname;
+  const reg = await navigator.serviceWorker.register(swUrl, { scope });
+
+  // navigator.serviceWorker.register resolves as soon as the SW *starts*
+  // installing — getToken needs it to be *active*, or the first call after
+  // first-time permission grant returns null.
+  if (reg.active) return reg;
+
+  await new Promise<void>((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    const watch = (sw: ServiceWorker | null) => {
+      if (!sw) return false;
+      if (sw.state === 'activated') {
+        finish();
+        return true;
+      }
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'activated') finish();
+      });
+      return true;
+    };
+    if (!watch(reg.installing) && !watch(reg.waiting) && !watch(reg.active)) {
+      // No worker yet — wait for one to appear, then watch it.
+      reg.addEventListener('updatefound', () => watch(reg.installing));
+    }
+    // Safety timeout in case the SW lifecycle stalls.
+    setTimeout(finish, 5000);
+  });
+
+  return reg;
 }
 
 async function getCurrentFcmToken(): Promise<string | null> {
