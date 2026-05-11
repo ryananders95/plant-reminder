@@ -51,10 +51,16 @@ export function subscribeToState(uid: string, onChange: (state: AppState) => voi
 
 export async function saveState(uid: string, state: AppState): Promise<void> {
   writeCache(state);
+  // Strip fields managed by other systems so a full-state save can never race
+  // with their writes. fcmTokens is managed by src/lib/messaging.ts via
+  // arrayUnion/arrayRemove; lastNotifiedDay is managed by the cron in
+  // scripts/notify.ts. Both can run while the React state still reflects a
+  // pre-update snapshot, so blanketing them in via merge would clobber.
+  const { fcmTokens: _t, lastNotifiedDay: _d, ...persisted } = state;
+  void _t;
+  void _d;
   try {
-    // merge: true so dedicated writers (e.g., FCM token mgmt, cron lastNotifiedDay)
-    // don't get clobbered by an app-side full-state write.
-    await setDoc(doc(db, 'users', uid), state, { merge: true });
+    await setDoc(doc(db, 'users', uid), persisted, { merge: true });
   } catch (err) {
     console.error('Firestore save error:', err);
   }
