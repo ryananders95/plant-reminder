@@ -23,6 +23,7 @@ export function App() {
   const [editing, setEditing] = useState<Editing>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const uid = authState && authState !== 'loading' ? authState.uid : null;
 
@@ -43,23 +44,28 @@ export function App() {
   }, [hydrated, uid, state.timezone]);
 
   // Foreground FCM messages: when the app is open, the SW's onBackgroundMessage
-  // doesn't fire — surface the notification ourselves. We use the SW's
-  // showNotification rather than new Notification(...) because the latter
-  // throws on Android Chrome for installed PWAs.
+  // doesn't fire and Android typically suppresses banners for the foreground
+  // app anyway. Show an in-app toast as the primary surface; also attempt a
+  // system notification in case the OS does deliver it.
   useEffect(() => {
     if (!uid) return;
     return onForegroundMessage(async (payload) => {
       const data = payload.data ?? {};
       const title = data.title ?? 'Plant Reminder';
       const body = data.body ?? '';
-      if (Notification.permission !== 'granted') return;
-      try {
-        const reg = await navigator.serviceWorker.ready;
-        const iconUrl = new URL('pwa-192x192.png', document.baseURI).href;
-        const badgeUrl = new URL('pwa-64x64.png', document.baseURI).href;
-        await reg.showNotification(title, { body, icon: iconUrl, badge: badgeUrl });
-      } catch (err) {
-        console.error('Failed to show foreground notification:', err);
+
+      setToast(body ? `${title}: ${body}` : title);
+      window.setTimeout(() => setToast(null), 5000);
+
+      if (Notification.permission === 'granted') {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const iconUrl = new URL('pwa-192x192.png', document.baseURI).href;
+          const badgeUrl = new URL('pwa-64x64.png', document.baseURI).href;
+          await reg.showNotification(title, { body, icon: iconUrl, badge: badgeUrl });
+        } catch (err) {
+          console.error('Failed to show foreground notification:', err);
+        }
       }
     });
   }, [uid]);
@@ -154,6 +160,11 @@ export function App() {
   return (
     <div className="app">
       <InstallBanner />
+      {toast && (
+        <div className="fg-toast" role="status" onClick={() => setToast(null)}>
+          {toast}
+        </div>
+      )}
       <header className="header">
         <h1>Plant Reminder</h1>
         <div className="header-actions">
