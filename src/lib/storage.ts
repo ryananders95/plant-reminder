@@ -1,5 +1,6 @@
 import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import { showError, withCode } from './toast';
 import { CURRENT_VERSION, INITIAL_STATE, type AppState } from '../types';
 
 const CACHE_KEY = 'plantreminder.state';
@@ -42,10 +43,14 @@ export function subscribeToState(uid: string, onChange: (state: AppState) => voi
           await setDoc(ref, seed);
         } catch (err) {
           console.error('Failed to seed initial state:', err);
+          showError(withCode("Couldn't save your plants to the cloud.", err));
         }
       }
     },
-    (err) => console.error('Firestore subscribe error:', err),
+    (err) => {
+      console.error('Firestore subscribe error:', err);
+      showError(withCode("Couldn't sync your plants. Showing the copy saved on this device.", err));
+    },
   );
 }
 
@@ -63,6 +68,7 @@ export async function saveState(uid: string, state: AppState): Promise<void> {
     await setDoc(doc(db, 'users', uid), persisted, { merge: true });
   } catch (err) {
     console.error('Firestore save error:', err);
+    showError(withCode("Couldn't save your changes to the cloud.", err));
   }
 }
 
@@ -74,5 +80,6 @@ export async function patchUserDoc(uid: string, patch: Partial<AppState>): Promi
     await updateDoc(doc(db, 'users', uid), patch);
   } catch (err) {
     console.error('Firestore patch error:', err);
+    showError(withCode("Couldn't save your settings to the cloud.", err));
   }
 }

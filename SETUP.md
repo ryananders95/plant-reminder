@@ -75,6 +75,13 @@ This is the key step that solves the "unverified app" problem — Firebase Auth 
 
 ### 6. Enable Cloud Storage
 
+> **Requires the Blaze plan.** Cloud Storage for Firebase (`*.firebasestorage.app` buckets) only works on the pay-as-you-go **Blaze** plan. Firestore, Auth, and FCM work on the free Spark plan, but Storage does not. This app's usage fits within Blaze's free tier, so the expected bill is $0.
+>
+> - Upgrade: Console → ⚙ → **Usage and billing** → **Details & settings** → **Modify plan** → **Blaze**. Link a billing account that won't expire. A Google Cloud free-trial billing account closes after 90 days, and that drops the project back to Spark.
+> - Set a budget alert while you're there. We use **$1**. Budgets only send emails; they don't cap spending.
+>
+> **Symptom if the project falls back to Spark:** every plant photo turns into the 🪴 placeholder, while plants, schedules, and settings keep working (those live in Firestore). The app shows a red "Couldn't load plant photos." toast. Fix: upgrade back to Blaze. The photo files and each plant's `photoFileId` survive the downgrade (confirmed 2026-11-17), so photos return without re-uploading.
+
 - Sidebar → **Build** → **Storage** → **Get started**.
 - Walk through prompts: **production mode**, use the same location you picked for Firestore. Click **Done**.
 - Click the **Rules** tab → replace with:

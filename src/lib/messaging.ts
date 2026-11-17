@@ -9,6 +9,7 @@ import {
 } from 'firebase/messaging';
 import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { app, db } from './firebase';
+import { showError, withCode } from './toast';
 
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY as string | undefined;
 
@@ -121,6 +122,7 @@ export async function unregisterFcmToken(uid: string): Promise<void> {
     }
   } catch (err) {
     console.error('FCM token removal failed:', err);
+    showError(withCode("Couldn't turn off notifications for this device.", err));
   }
 }
 

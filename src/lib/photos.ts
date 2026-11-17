@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { storage } from './firebase';
+import { showError, withCode } from './toast';
 
 const MAX_EDGE = 1024;
 const JPEG_QUALITY = 0.85;
@@ -86,7 +87,11 @@ export function usePhotoUrl(uid: string | null, photoId: string | undefined): st
       .then((u) => {
         if (!cancelled) setUrl(u);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error('Photo load failed:', err);
+        // Every photo failing at once usually means Storage itself is
+        // unavailable (e.g. the project fell off the Blaze plan) — see SETUP.md.
+        showError(withCode("Couldn't load plant photos.", err));
         if (!cancelled) setUrl(undefined);
       });
     return () => {

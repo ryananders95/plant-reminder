@@ -6,7 +6,7 @@ Live at https://ryananders95.github.io/plant-reminder/.
 
 ## Stack
 
-Vite + React 19 + TypeScript, PWA via `vite-plugin-pwa`. Auth, data (Firestore), photos (Storage), and push (FCM) all sit in a single Firebase project. GitHub Pages hosts the build; a GitHub Actions cron sends pushes every 30 min. Total cost: $0.
+Vite + React 19 + TypeScript, PWA via `vite-plugin-pwa`. Auth, data (Firestore), photos (Storage), and push (FCM) all sit in a single Firebase project. GitHub Pages hosts the build; a GitHub Actions cron sends pushes every 30 min. Expected cost: $0. The Firebase project has to be on the **Blaze** (pay-as-you-go) plan because Cloud Storage requires it, but usage stays inside the free tier and a $1 budget alert is set. If the project ever falls back to Spark, plant photos stop loading while everything else keeps working (see `SETUP.md` → "Enable Cloud Storage").
 
 ## Local development
 

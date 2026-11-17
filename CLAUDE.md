@@ -62,6 +62,10 @@ The user's environment is **Windows + PowerShell**. Node was installed via `wing
 
 - **iOS push only works for the installed PWA**, not in a Safari tab. The Settings screen handles this gracefully (`isIOS && !isStandalone` shows an install hint instead of the toggle). The `InstallBanner` component covers the in-app nudge.
 
+- **Cloud Storage needs the Blaze plan; Firestore doesn't.** If the project drops to Spark (for example, a billing trial ends), photos stop loading while plant data keeps working. This happened in 2026. See `SETUP.md` → "Enable Cloud Storage".
+
+- **Surface user-visible failures with `showError()`** from `src/lib/toast.ts`, not just `console.error`. It works from non-React modules, dedupes the same message for 60 s (so N failing photos produce one toast), and `withCode(msg, err)` appends the Firebase error code (e.g. `storage/unauthorized`) for diagnosis. `<Toast />` is mounted once in `main.tsx`, outside `App`, so it shows on every screen.
+
 - **Vite `base` is `'./'`** (relative). Where absolute paths matter (SW registration, notification icons), resolve via `new URL('asset', document.baseURI).pathname` rather than relying on `import.meta.env.BASE_URL`, which is `'./'` and not document-rooted.
 
 ## Don't rename these (they look renameable but aren't)
@@ -85,6 +89,7 @@ User-facing strings ("PlantPapi", "Plant Reminder" — formerly) are safe to edi
 | `src/lib/auth.ts` | `useAuth` hook, `signInWithPopup` always. |
 | `src/lib/messaging.ts` | FCM init, SW register + wait-for-activation, token register/unregister, foreground message subscription |
 | `src/lib/photos.ts` | Image resize (canvas, 1024 px JPEG ~85%), upload, `getPhotoUrl` (cached), `deletePhoto`, `usePhotoUrl` hook |
+| `src/lib/toast.ts` + `src/components/Toast.tsx` | App-wide error toast: `showError`, `withCode`, `useToastMessage` |
 | `scripts/notify.ts` | Cron entry. Iterates `users/*`, filters by local time window + dedupes via `lastNotifiedDay`, sends data-only FCM. |
 | `public/firebase-messaging-sw.js` | FCM SW (compat scripts from gstatic CDN, hardcoded Firebase config) |
 | `.github/workflows/deploy.yml` | Build + push to GitHub Pages; injects `VITE_FIREBASE_*` from secrets |
