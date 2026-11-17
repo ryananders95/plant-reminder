@@ -23,7 +23,11 @@ interface UserDoc {
   lastNotifiedDay?: string;
 }
 
-const NOTIFY_WINDOW_MIN = 30;
+// Wide enough to absorb GitHub Actions schedule drift / skipped runs. The
+// `lastNotifiedDay` dedupe below guarantees one push per user per day, so a
+// wider window only means "if we missed the on-time run, send on the next
+// run that fires" — never duplicates.
+const NOTIFY_WINDOW_MIN = 240;
 
 function parseHHMM(s: string): { h: number; m: number } | null {
   const match = /^(\d{1,2}):(\d{2})$/.exec(s);

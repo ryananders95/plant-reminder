@@ -146,3 +146,60 @@ VITE_FIREBASE_VAPID_KEY=<paste the VAPID key here>
 ### 5. iOS-specific reminder for users
 
 iPhone users **must install the PWA to their home screen** before push notifications can work. Safari tabs don't receive push on iOS. The in-app install banner and the Settings screen already nudge them.
+
+---
+
+## Phase 3.1 — External cron + monitoring
+
+GitHub Actions' `schedule:` trigger is best-effort and routinely delays or skips runs, especially at `:00` / `:30` slots. The fix below makes triggering reliable and pages you by email if pushes stop going out.
+
+The GitHub Actions `schedule:` block in `.github/workflows/notify.yml` stays in place as a fallback — the `lastNotifiedDay` dedupe and the widened `NOTIFY_WINDOW_MIN` in `scripts/notify.ts` make double-firing safe.
+
+### 1. Create a fine-grained GitHub PAT
+
+- https://github.com/settings/personal-access-tokens/new
+- **Resource owner**: your account.
+- **Repository access**: **Only select repositories** → `ryananders95/plant-reminder`.
+- **Permissions** → **Repository permissions** → **Actions**: **Read and write**. Leave everything else as default (no access).
+- Expiration: 1 year is fine. Set a calendar reminder to rotate before then.
+- Generate, copy the `github_pat_...` token immediately — you can't see it again.
+
+### 2. Configure cron-job.org as the primary trigger
+
+- Sign up at https://cron-job.org (free).
+- **Create cronjob** with:
+  - **Title**: `PlantPapi notify`
+  - **URL**: `https://api.github.com/repos/ryananders95/plant-reminder/actions/workflows/notify.yml/dispatches`
+  - **Schedule**: every 30 minutes (any hour, any day).
+  - **Advanced → Request method**: `POST`
+  - **Advanced → Request body** (raw JSON): `{"ref":"main"}`
+  - **Advanced → Request headers**:
+    - `Authorization`: `Bearer <your PAT from step 1>`
+    - `Accept`: `application/vnd.github+json`
+    - `X-GitHub-Api-Version`: `2022-11-28`
+    - `Content-Type`: `application/json`
+  - **Notifications**: enable "on failure" (emails the account address). Successful dispatches return HTTP 204 — anything else is a failure.
+- Click **Create cronjob**, then use "Run now" to verify a new run shows up in GitHub Actions within ~30 sec.
+
+### 3. Configure healthchecks.io for staleness alerting
+
+cron-job.org only catches HTTP failures of the dispatch POST. If GitHub Actions runs but `notify.ts` crashes, or if GH Actions itself is down, cron-job.org doesn't know. Healthchecks.io specifically alerts on "you should have pinged me by now."
+
+- Sign up at https://healthchecks.io (free tier: 20 checks).
+- **Add Check** named `plantpapi-notify`:
+  - **Schedule** tab → **Simple**: period **30 min**, **Grace Time**: **3 hours**.
+  - Copy the check's ping URL — looks like `https://hc-ping.com/<uuid>`.
+- Confirm email integration is on (it's the default).
+- In GitHub → repo Settings → Secrets and variables → Actions → **New repository secret**:
+  - **Name**: `HEALTHCHECK_URL`
+  - **Value**: the ping URL.
+
+The workflow's `Healthcheck ping` step is guarded by `env.HEALTHCHECK_URL != ''`, so it's a no-op until the secret is added.
+
+### 4. What to do when the alert email arrives
+
+The healthchecks.io email means at least one `notify.yml` run hasn't succeeded in the past 3+ hours. Open https://github.com/ryananders95/plant-reminder/actions/workflows/notify.yml and look at the most recent runs — common causes:
+
+- **Workflow not triggered at all**: check the cron-job.org execution history for HTTP errors on the dispatch POST (most often: expired PAT). Rotate the PAT and update the cron-job.org `Authorization` header.
+- **Workflow ran but failed**: open the failed run's logs. Most likely a Firebase Admin SDK auth error (rotated service account?) or a code regression in `scripts/notify.ts`.
+- **GitHub Actions is down**: rare; check https://www.githubstatus.com. The widened `NOTIFY_WINDOW_MIN` of 4 hours means pushes will catch up automatically once Actions recovers.
