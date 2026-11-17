@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: write # keepalive step re-enables this workflow via the API
 
 concurrency:
   group: notify
@@ -15,6 +16,10 @@ concurrency:
 jobs:
   notify:
     runs-on: ubuntu-latest
+    env:
+      # Job-level so the Healthcheck step's `if:` can see it (a step's own
+      # env isn't available to that step's `if:`).
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,5 +33,13 @@ jobs:
       - name: Healthcheck ping
         if: success() && env.HEALTHCHECK_URL != ''
         run: curl -fsS -m 10 --retry 3 "$HEALTHCHECK_URL"
+      # GitHub disables scheduled workflows after 60 days with no repo
+      # activity (this one was off 2026-07-10 → 2026-11-17). Re-enabling an
+      # active workflow is a no-op that should reset that timer; runs even if
+      # notify failed, and never fails the job itself.
+      - name: Keepalive (prevent 60-day inactivity disable)
+        if: always()
+        continue-on-error: true
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/notify.yml/enable"
         env:
-          HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}
+          GH_TOKEN: ${{ github.token }}

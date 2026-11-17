@@ -207,6 +207,7 @@ The workflow's `Healthcheck ping` step is guarded by `env.HEALTHCHECK_URL != ''`
 
 The healthchecks.io email means at least one `notify.yml` run hasn't succeeded in the past 3+ hours. Open https://github.com/ryananders95/plant-reminder/actions/workflows/notify.yml and look at the most recent runs — common causes:
 
+- **Workflow disabled for inactivity**: GitHub turns off scheduled workflows after 60 days with no repo activity. The Actions page shows a banner, and the API reports `state: disabled_inactivity`. `notify.yml` has a keepalive step that re-enables itself on every run to prevent this. If it happens anyway, click **Enable workflow** on the Actions page or push any commit (a push re-enabled it on 2026-11-17).
 - **Workflow not triggered at all**: check the cron-job.org execution history for HTTP errors on the dispatch POST (most often: expired PAT). Rotate the PAT and update the cron-job.org `Authorization` header.
 - **Workflow ran but failed**: open the failed run's logs. Most likely a Firebase Admin SDK auth error (rotated service account?) or a code regression in `scripts/notify.ts`.
 - **GitHub Actions is down**: rare; check https://www.githubstatus.com. The widened `NOTIFY_WINDOW_MIN` of 4 hours means pushes will catch up automatically once Actions recovers.
