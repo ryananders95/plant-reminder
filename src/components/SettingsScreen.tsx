@@ -7,6 +7,18 @@ import {
 } from '../lib/messaging';
 import type { AppState } from '../types';
 
+function formatBuildTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 const TIME_OPTIONS: { value: string; label: string }[] = Array.from({ length: 48 }, (_, i) => {
   const h = Math.floor(i / 2);
   const m = (i % 2) * 30;
@@ -193,6 +205,10 @@ export function SettingsScreen({
             You can revoke notification permission anytime through your browser or OS settings.
           </li>
         </ul>
+
+        <p className="hint app-version">
+          Version {__APP_VERSION__} · built {formatBuildTime(__BUILD_TIME__)}
+        </p>
       </main>
     </div>
   );
