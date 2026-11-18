@@ -5,6 +5,7 @@ import { PlantForm } from './PlantForm';
 import { todayIso } from '../lib/schedule';
 import type { Plant } from '../types';
 import { deletePhoto, uploadPhoto } from '../lib/photos';
+import type { LeaveGuard } from '../lib/useNavStack';
 
 vi.mock('../lib/photos', () => ({
   usePhotoUrl: () => undefined,
@@ -245,5 +246,79 @@ describe('PlantForm — photo changes are only applied on Save', () => {
     expect(onDelete).not.toHaveBeenCalled();
     expect(deletePhoto).not.toHaveBeenCalled();
     confirmSpy.mockRestore();
+  });
+});
+
+describe('PlantForm — "Discard unsaved changes?" guard', () => {
+  const existing: Plant = { id: 'p1', name: 'Pothos', schedules: {}, lastDone: {} };
+
+  function renderWithGuard(plant: Plant | null = existing) {
+    let guard: LeaveGuard | null = null;
+    const setLeaveGuard = (g: LeaveGuard | null) => {
+      guard = g;
+    };
+    const onSave = vi.fn();
+    const utils = render(
+      <PlantForm
+        uid="u1"
+        plant={plant}
+        onSave={onSave}
+        onDelete={() => {}}
+        onCancel={() => {}}
+        setLeaveGuard={setLeaveGuard}
+      />,
+    );
+    return { ...utils, onSave, guard: () => guard };
+  }
+
+  it('lets you leave without asking when nothing changed', () => {
+    const confirmSpy = vi.spyOn(window, 'confirm');
+    const { guard } = renderWithGuard();
+    expect(guard()!()).toBe(true);
+    expect(confirmSpy).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  it('asks before leaving with unsaved changes, and stays if you decline', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const { guard } = renderWithGuard();
+    await user.type(screen.getByPlaceholderText(/e.g. Monstera/i), ' Jr');
+
+    expect(guard()!()).toBe(false);
+    expect(confirmSpy).toHaveBeenCalledWith('Discard unsaved changes?');
+
+    confirmSpy.mockReturnValue(true);
+    expect(guard()!()).toBe(true);
+    confirmSpy.mockRestore();
+  });
+
+  it('a removed photo counts as an unsaved change', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const { guard } = renderWithGuard({ ...existing, photoFileId: 'orig' });
+    await user.click(screen.getByRole('button', { name: 'Remove' }));
+    expect(guard()!()).toBe(false);
+    confirmSpy.mockRestore();
+  });
+
+  it('does not ask after Save', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm');
+    const { guard, onSave } = renderWithGuard();
+    await user.type(screen.getByPlaceholderText(/e.g. Monstera/i), ' Jr');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(guard()!()).toBe(true);
+    expect(confirmSpy).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  it('unregisters the guard when the form closes', () => {
+    const { guard, unmount } = renderWithGuard();
+    expect(guard()).not.toBeNull();
+    unmount();
+    expect(guard()).toBeNull();
   });
 });

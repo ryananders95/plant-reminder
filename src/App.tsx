@@ -24,7 +24,7 @@ export function App() {
   const authState = useAuth();
   const [state, setState] = useState<AppState>(() => loadInitialState());
   const [hydrated, setHydrated] = useState(false);
-  const { top, push, pop } = useNavStack<Screen>({ kind: 'today' });
+  const { top, push, pop, setLeaveGuard } = useNavStack<Screen>({ kind: 'today' });
 
   const uid = authState && authState !== 'loading' ? authState.uid : null;
 
@@ -146,6 +146,7 @@ export function App() {
           onSave={upsertPlant}
           onDelete={editingPlant ? () => deletePlant(editingPlant.id) : null}
           onCancel={pop}
+          setLeaveGuard={setLeaveGuard}
         />
       </>
     );
