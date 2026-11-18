@@ -63,4 +63,40 @@ describe('useNavStack', () => {
       backSpy.mockRestore();
     }
   });
+
+  it('a leave guard that says "stay" keeps the screen and restores the history entry', () => {
+    const { result } = renderHook(() => useNavStack<Screen>(root));
+    act(() => result.current.push(b));
+    const pushSpy = vi.spyOn(window.history, 'pushState');
+    try {
+      act(() => result.current.setLeaveGuard(() => false));
+      act(() => {
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+      expect(result.current.top).toBe(b);
+      expect(pushSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      pushSpy.mockRestore();
+    }
+  });
+
+  it('a leave guard that says "go" pops normally, and clearing it removes the check', () => {
+    const { result } = renderHook(() => useNavStack<Screen>(root));
+    act(() => result.current.push(b));
+    act(() => result.current.push(c));
+    const guard = vi.fn(() => true);
+    act(() => result.current.setLeaveGuard(guard));
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(guard).toHaveBeenCalledTimes(1);
+    expect(result.current.top).toBe(b);
+
+    act(() => result.current.setLeaveGuard(null));
+    act(() => {
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(guard).toHaveBeenCalledTimes(1);
+    expect(result.current.top).toBe(root);
+  });
 });

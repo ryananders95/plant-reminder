@@ -11,6 +11,7 @@ import {
 } from '../types';
 import { todayIso } from '../lib/schedule';
 import { deletePhoto } from '../lib/photos';
+import type { LeaveGuard } from '../lib/useNavStack';
 import { PhotoPicker } from './PhotoPicker';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -21,12 +22,15 @@ export function PlantForm({
   onSave,
   onDelete,
   onCancel,
+  setLeaveGuard,
 }: {
   uid: string;
   plant: Plant | null;
   onSave: (plant: Plant) => void;
   onDelete: (() => void) | null;
   onCancel: () => void;
+  /** From useNavStack: lets the form veto leaving (Cancel / system Back). */
+  setLeaveGuard?: (guard: LeaveGuard | null) => void;
 }) {
   const [name, setName] = useState(plant?.name ?? '');
   const [room, setRoom] = useState(plant?.room ?? '');
@@ -82,6 +86,30 @@ export function PlantForm({
 
   const canSave = name.trim().length > 0;
 
+  // "Discard changes?" on Cancel / system Back when anything differs from how
+  // the form opened. Save and Delete set `closing` first so their own
+  // navigation back doesn't prompt.
+  const snapshot = JSON.stringify({
+    name: name.trim(),
+    room: room.trim(),
+    notes: notes.trim(),
+    photoFileId: photoFileId ?? null,
+    schedules,
+    lastDone,
+  });
+  const [initialSnapshot] = useState(snapshot);
+  const dirty = useRef(false);
+  dirty.current = snapshot !== initialSnapshot;
+  const closing = useRef(false);
+
+  useEffect(() => {
+    if (!setLeaveGuard) return;
+    setLeaveGuard(
+      () => closing.current || !dirty.current || window.confirm('Discard unsaved changes?'),
+    );
+    return () => setLeaveGuard(null);
+  }, [setLeaveGuard]);
+
   const handleSave = () => {
     if (!canSave) return;
     const result: Plant = {
@@ -96,6 +124,7 @@ export function PlantForm({
     const toDelete = [...sessionUploads.current].filter((id) => id !== photoFileId);
     if (originalPhotoId && originalPhotoId !== photoFileId) toDelete.push(originalPhotoId);
     saved.current = true;
+    closing.current = true;
     onSave(result);
     toDelete.forEach((id) => void deletePhoto(uid, id));
   };
@@ -149,6 +178,7 @@ export function PlantForm({
             className="delete-button"
             onClick={() => {
               if (!window.confirm('Delete this plant?')) return;
+              closing.current = true;
               onDelete();
               // The plant's stored photo goes with it. Uploads made during
               // this edit are cleaned up by the unmount effect above.
