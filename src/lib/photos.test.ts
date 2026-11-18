@@ -10,13 +10,38 @@ vi.mock('firebase/storage', () => ({
 }));
 
 import { getDownloadURL } from 'firebase/storage';
-import { usePhotoUrl } from './photos';
+import { deletePhoto, getPersistedPhotoUrl, PHOTO_CACHE_CONTROL, usePhotoUrl } from './photos';
 import { resetToastsForTests, useToastMessage } from './toast';
 
 describe('usePhotoUrl', () => {
   afterEach(() => {
     resetToastsForTests();
     vi.mocked(getDownloadURL).mockReset();
+    localStorage.clear();
+  });
+
+  it('marks photos as long-lived and immutable for the browser cache', () => {
+    expect(PHOTO_CACHE_CONTROL).toBe('private, max-age=31536000, immutable');
+  });
+
+  it('renders a URL saved on a previous launch immediately, before Storage answers', () => {
+    localStorage.setItem(
+      'plantreminder.photoUrls',
+      JSON.stringify({ 'u1/saved-photo': 'https://example.test/saved.jpg' }),
+    );
+    vi.mocked(getDownloadURL).mockReturnValue(new Promise(() => {})); // never resolves
+    const { result } = renderHook(() => usePhotoUrl('u1', 'saved-photo'));
+    expect(result.current).toBe('https://example.test/saved.jpg');
+  });
+
+  it('saves the download URL for the next launch, and forgets it on delete', async () => {
+    vi.mocked(getDownloadURL).mockResolvedValue('https://example.test/new.jpg');
+    const { result } = renderHook(() => usePhotoUrl('u1', 'new-photo'));
+    await waitFor(() => expect(result.current).toBe('https://example.test/new.jpg'));
+    expect(getPersistedPhotoUrl('u1', 'new-photo')).toBe('https://example.test/new.jpg');
+
+    await deletePhoto('u1', 'new-photo');
+    expect(getPersistedPhotoUrl('u1', 'new-photo')).toBeUndefined();
   });
 
   it('returns the download URL on success', async () => {

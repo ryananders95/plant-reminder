@@ -64,6 +64,8 @@ The user's environment is **Windows + PowerShell**. Node was installed via `wing
 
 - **Cloud Storage needs the Blaze plan; Firestore doesn't.** If the project drops to Spark (for example, a billing trial ends), photos stop loading while plant data keeps working. This happened in 2026. See `SETUP.md` → "Enable Cloud Storage".
 
+- **Photos are cached on the device in two layers.** Download URLs persist in localStorage (`plantreminder.photoUrls`, see `photos.ts`). The image bytes sit in the browser's HTTP cache, because `uploadPhoto` sets `cacheControl: 'private, max-age=31536000, immutable'` on the object. Storage's default is `private, max-age=0`, which re-checks every photo on every launch. This relies on photo IDs never being reused, so always upload a replacement under a new UUID and never overwrite an object in place. Don't move photo caching into the service worker. Storage download URLs don't send CORS headers, so `<img crossOrigin>` breaks the images, and an opaque response can't be told apart from a 403 (tried 2026-11-18).
+
 - **Surface user-visible failures with `showError()`** from `src/lib/toast.ts`, not just `console.error`. It works from non-React modules, dedupes the same message for 60 s (so N failing photos produce one toast), and `withCode(msg, err)` appends the Firebase error code (e.g. `storage/unauthorized`) for diagnosis. `<Toast />` is mounted once in `main.tsx`, outside `App`, so it shows on every screen.
 
 - **Vite `base` is `'./'`** (relative). Where absolute paths matter (SW registration, notification icons), resolve via `new URL('asset', document.baseURI).pathname` rather than relying on `import.meta.env.BASE_URL`, which is `'./'` and not document-rooted.
@@ -72,7 +74,7 @@ The user's environment is **Windows + PowerShell**. Node was installed via `wing
 
 - The GitHub repo slug `plant-reminder` — renaming changes the deployed URL and breaks every existing installed PWA.
 - The Firebase project ID `plant-reminder-a93bf` — Firebase doesn't support project rename; you'd have to migrate.
-- The localStorage cache keys `plantreminder.state` and `plantreminder.installBannerDismissed` — changing them orphans every user's local cache.
+- The localStorage cache keys `plantreminder.state`, `plantreminder.installBannerDismissed`, and `plantreminder.photoUrls` — changing them orphans every user's local cache.
 - The `name` field in `package.json` (`plant-reminder`) — purely internal npm id, but inertia exceeds value.
 
 User-facing strings ("PlantPapi", "Plant Reminder" — formerly) are safe to edit.
