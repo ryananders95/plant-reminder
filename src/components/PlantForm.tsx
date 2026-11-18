@@ -37,6 +37,7 @@ export function PlantForm({
   //   intermediate uploads that didn't end up on the plant.
   // - Cancel / system Back / any other unmount without Save: keep the
   //   original, delete every upload made in this session (none are referenced).
+  // - Delete Plant: also delete the original (see the Delete button).
   const originalPhotoId = plant?.photoFileId;
   const sessionUploads = useRef(new Set<string>());
   const saved = useRef(false);
@@ -147,7 +148,11 @@ export function PlantForm({
           <button
             className="delete-button"
             onClick={() => {
-              if (window.confirm('Delete this plant?')) onDelete();
+              if (!window.confirm('Delete this plant?')) return;
+              onDelete();
+              // The plant's stored photo goes with it. Uploads made during
+              // this edit are cleaned up by the unmount effect above.
+              if (originalPhotoId) void deletePhoto(uid, originalPhotoId);
             }}
           >
             Delete Plant

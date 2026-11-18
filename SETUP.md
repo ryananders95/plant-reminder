@@ -90,12 +90,19 @@ This is the key step that solves the "unverified app" problem — Firebase Auth 
   service firebase.storage {
     match /b/{bucket}/o {
       match /users/{uid}/{allPaths=**} {
-        allow read, write: if request.auth != null && request.auth.uid == uid;
+        allow read, delete: if request.auth != null && request.auth.uid == uid;
+        // Uploads must be JPEGs under 2 MB. The app resizes to 1024 px
+        // JPEG (~100–150 KB), so this only blocks bugs or abuse filling
+        // the bucket with large files.
+        allow create, update: if request.auth != null && request.auth.uid == uid
+          && request.resource.size < 2 * 1024 * 1024
+          && request.resource.contentType == 'image/jpeg';
       }
     }
   }
   ```
 - Click **Publish**.
+- The size/type limits were added 2026-11-18. If your published rules still have the single `allow read, write` line, replace them with the block above.
 
 ### 7. Wire the firebaseConfig into the app
 

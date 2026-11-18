@@ -216,4 +216,34 @@ describe('PlantForm — photo changes are only applied on Save', () => {
     expect(deletePhoto).toHaveBeenCalledTimes(1);
     expect(deletePhoto).toHaveBeenCalledWith('u1', 'orig');
   });
+
+  it('Delete Plant deletes its photo, plus any upload made during this edit', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const onDelete = vi.fn();
+    const { container, unmount } = render(
+      <PlantForm uid="u1" plant={withPhoto} onSave={onSave} onDelete={onDelete} onCancel={() => {}} />,
+    );
+    await replacePhoto(user, container);
+    await user.click(screen.getByRole('button', { name: 'Delete Plant' }));
+    unmount();
+
+    expect(onDelete).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(deletePhoto).mock.calls.map((c) => c[1]).sort()).toEqual(['new-photo', 'orig']);
+    confirmSpy.mockRestore();
+  });
+
+  it('declining the Delete confirmation deletes nothing', async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const onDelete = vi.fn();
+    render(
+      <PlantForm uid="u1" plant={withPhoto} onSave={onSave} onDelete={onDelete} onCancel={() => {}} />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Delete Plant' }));
+
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(deletePhoto).not.toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
 });
