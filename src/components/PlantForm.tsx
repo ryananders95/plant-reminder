@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   ALL_MONTHS,
@@ -10,6 +10,7 @@ import {
   type TaskType,
 } from '../types';
 import { todayIso } from '../lib/schedule';
+import { deletePhoto } from '../lib/photos';
 import { PhotoPicker } from './PhotoPicker';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -31,6 +32,28 @@ export function PlantForm({
   const [room, setRoom] = useState(plant?.room ?? '');
   const [notes, setNotes] = useState(plant?.notes ?? '');
   const [photoFileId, setPhotoFileId] = useState(plant?.photoFileId);
+  // Photo cleanup is deferred until the form closes:
+  // - Save: delete the original photo if it was replaced/removed, plus any
+  //   intermediate uploads that didn't end up on the plant.
+  // - Cancel / system Back / any other unmount without Save: keep the
+  //   original, delete every upload made in this session (none are referenced).
+  const originalPhotoId = plant?.photoFileId;
+  const sessionUploads = useRef(new Set<string>());
+  const saved = useRef(false);
+
+  const handlePhotoChange = (next: string | undefined) => {
+    if (next && next !== originalPhotoId) sessionUploads.current.add(next);
+    setPhotoFileId(next);
+  };
+
+  useEffect(() => {
+    const uploads = sessionUploads.current;
+    return () => {
+      if (saved.current) return;
+      uploads.forEach((id) => void deletePhoto(uid, id));
+    };
+  }, [uid]);
+
   const [schedules, setSchedules] = useState<Partial<Record<TaskType, ScheduleRule[]>>>(
     plant?.schedules ?? {},
   );
@@ -69,7 +92,11 @@ export function PlantForm({
       schedules,
       lastDone,
     };
+    const toDelete = [...sessionUploads.current].filter((id) => id !== photoFileId);
+    if (originalPhotoId && originalPhotoId !== photoFileId) toDelete.push(originalPhotoId);
+    saved.current = true;
     onSave(result);
+    toDelete.forEach((id) => void deletePhoto(uid, id));
   };
 
   return (
@@ -83,7 +110,7 @@ export function PlantForm({
       </header>
 
       <main className="form-body">
-        <PhotoPicker uid={uid} photoId={photoFileId} onChange={setPhotoFileId} />
+        <PhotoPicker uid={uid} photoId={photoFileId} onChange={handlePhotoChange} />
 
         <label className="field">
           <span className="field-label">Name</span>

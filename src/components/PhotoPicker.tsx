@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
-import { deletePhoto, uploadPhoto, usePhotoUrl } from '../lib/photos';
+import { uploadPhoto, usePhotoUrl } from '../lib/photos';
 
+// Uploads a new photo and reports its ID, but never deletes anything: the
+// parent form decides on Save/Cancel which stored photos to clean up. Deleting
+// here broke Cancel (the plant still pointed at the deleted file).
 export function PhotoPicker({
   uid,
   photoId,
@@ -12,7 +15,7 @@ export function PhotoPicker({
 }) {
   const cameraRef = useRef<HTMLInputElement | null>(null);
   const libraryRef = useRef<HTMLInputElement | null>(null);
-  const [busy, setBusy] = useState<'uploading' | 'removing' | null>(null);
+  const [busy, setBusy] = useState<'uploading' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const url = usePhotoUrl(uid, photoId);
 
@@ -23,10 +26,7 @@ export function PhotoPicker({
     setError(null);
     setBusy('uploading');
     try {
-      const newId = await uploadPhoto(uid, file);
-      const oldId = photoId;
-      onChange(newId);
-      if (oldId) await deletePhoto(uid, oldId);
+      onChange(await uploadPhoto(uid, file));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
       console.error('Photo upload failed:', err);
@@ -35,19 +35,9 @@ export function PhotoPicker({
     }
   };
 
-  const handleRemove = async () => {
-    if (!photoId) return;
+  const handleRemove = () => {
     setError(null);
-    setBusy('removing');
-    try {
-      const oldId = photoId;
-      onChange(undefined);
-      await deletePhoto(uid, oldId);
-    } catch (err) {
-      console.error('Photo remove failed:', err);
-    } finally {
-      setBusy(null);
-    }
+    onChange(undefined);
   };
 
   return (
